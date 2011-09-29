@@ -87,8 +87,7 @@ public class BatchRestAPITest extends RestTestBase {
                 TestBatchResult result=new TestBatchResult();
                 result.n1 = batchRestApi.createNode(map("name", "node1"));
                 result.n1.delete();
-                result.n2 = batchRestApi.createNode(map("name", "node2"));
-                
+                result.n2 = batchRestApi.createNode(map("name", "node2"));                
                 return result;
             }
         });         

@@ -96,7 +96,7 @@ public class BatchRestAPI extends RestAPI {
     }
      
     @Override
-    public void setProperty( RestEntity entity, String key, Object value ) {       
+    public void setPropertyOnEntity( RestEntity entity, String key, Object value ) {       
         RequestResult response = entity.getRestRequest().put( "properties/" + key, value);
         final long batchId = response.getBatchId();     
         getRecordingRequest().getOperations().addToRestOperation(batchId, entity, new RestEntityPropertyRefresher(entity));       

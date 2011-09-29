@@ -51,7 +51,7 @@ public class RestEntity implements PropertyContainer, UpdatableRestResult<RestEn
     }
     
     public void updateFrom(RestEntity updateEntity, RestAPI restApi){  
-        if (this == updateEntity){
+        if (this == updateEntity){            
             this.lastTimeFetchedPropertyData = 0;
         }
         this.restApi = restApi;
@@ -66,17 +66,11 @@ public class RestEntity implements PropertyContainer, UpdatableRestResult<RestEn
             this.structuralData = restRequest.get( "" ) .toMap();
         }
         return this.structuralData;
-    }
-
+    }    
+   
     Map<String, Object> getPropertyData() {       
         if (hasToUpdateProperties()) {            
-        	RequestResult response = restRequest.get( "properties" );
-            boolean ok = response.statusIs( Status.OK );
-            if ( ok ) {
-                this.propertyData = (Map<String, Object>) response.toMap(  );
-            } else {
-                this.propertyData = Collections.emptyMap();
-            }
+        	this.propertyData = restApi.getPropertiesFromEntity(this);
             this.lastTimeFetchedPropertyData = System.currentTimeMillis();
         }
         return this.propertyData;
@@ -146,7 +140,7 @@ public class RestEntity implements PropertyContainer, UpdatableRestResult<RestEn
     }
 
     public void setProperty( String key, Object value ) {
-       this.restApi.setProperty(this, key, value);
+       this.restApi.setPropertyOnEntity(this, key, value);
     }
 
     public void invalidatePropertyData() {
@@ -162,7 +156,7 @@ public class RestEntity implements PropertyContainer, UpdatableRestResult<RestEn
     }
 
     public void delete() {
-        this.restApi.delete(this);
+        this.restApi.deleteEntity(this);
     }
 
     @Override

@@ -34,7 +34,7 @@ public abstract class RestIndex<T extends PropertyContainer> implements Index<T>
     }
 
     public void add( T entity, String key, Object value ) {
-       restApi.add(entity, this, key, value);
+       restApi.addToIndex(entity, this, key, value);
     }
 
     public String indexPath( String key, Object value ) {
@@ -45,15 +45,15 @@ public abstract class RestIndex<T extends PropertyContainer> implements Index<T>
     }
 
     public void remove( T entity, String key, Object value ) {
-       restApi.remove(this, entity, key, value);
+       restApi.removeFromIndex(this, entity, key, value);
     }  
 
     public void remove(T entity, String key) {
-       restApi.remove(this, entity, key);
+       restApi.removeFromIndex(this, entity, key);
     }
 
     public void remove(T entity) {       
-        restApi.remove(this, entity);
+        restApi.removeFromIndex(this, entity);
     }
 
     public void delete() {

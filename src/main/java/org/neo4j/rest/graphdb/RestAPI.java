@@ -156,10 +156,8 @@ public class RestAPI {
         BatchRestAPI batchRestApi = new BatchRestAPI(this.restRequest.getUri(), (ExecutingRestRequest) this.restRequest);
         T batchResult = batchCallback.recordBatch(batchRestApi);
         batchRestApi.stop();
-        RestOperations operations = batchRestApi.getRecordedOperations();
-        System.out.println( createBatchRequestData(operations).toString());
-        RequestResult response = this.restRequest.post("batch", createBatchRequestData(operations));    
-        System.out.println(response.getEntity());
+        RestOperations operations = batchRestApi.getRecordedOperations();      
+        RequestResult response = this.restRequest.post("batch", createBatchRequestData(operations));      
         Map<Long, Object> mappedObjects = convertRequestResultToEntities(operations, response);
         updateRestOperations(operations, mappedObjects);
         return batchResult;
@@ -243,7 +241,7 @@ public class RestAPI {
         }
     }
     
-    public void delete(RestEntity entity) {
+    public void deleteEntity(RestEntity entity) {
         entity.getRestRequest().delete( "" );
     }
     public IndexInfo indexInfo(final String indexType) {
@@ -251,11 +249,24 @@ public class RestAPI {
         return new RetrievedIndexInfo(response);
     }
     
-    public void setProperty( RestEntity entity, String key, Object value ) {
+    public void setPropertyOnEntity( RestEntity entity, String key, Object value ) {
         entity.getRestRequest().put( "properties/" + key, value);
         entity.invalidatePropertyData();
     }
     
+    public Map<String, Object> getPropertiesFromEntity(RestEntity entity){
+        RequestResult response = entity.getRestRequest().get( "properties" );
+        Map<String, Object> properties;
+        boolean ok = response.statusIs( Status.OK );
+        if ( ok ) {
+            properties = (Map<String, Object>) response.toMap(  );
+        } else {
+            properties = Collections.emptyMap();
+        }
+       
+        return properties;
+    }
+
     
     public void deleteIndex(RestIndex index, String indexPath) {
         index.getRestRequest().delete(indexPath);
@@ -265,23 +276,23 @@ public class RestAPI {
         deleteIndex(index, index.indexPath(null,null));
     }
     
-    public <T> void remove( RestIndex index, T entity, String key, Object value ) {
+    public <T> void removeFromIndex( RestIndex index, T entity, String key, Object value ) {
         final String indexPath = index.indexPath(key, value) + "/" + ((RestEntity) entity).getId();
         deleteIndex(index,indexPath);
     }  
 
-    public <T> void remove(RestIndex index, T entity, String key) {
+    public <T> void removeFromIndex(RestIndex index, T entity, String key) {
         deleteIndex(index, index.indexPath(key, null) + "/" + ((RestEntity) entity).getId());
     }
 
-    public <T> void remove(RestIndex index, T entity) {       
+    public <T> void removeFromIndex(RestIndex index, T entity) {       
         deleteIndex(index, index.indexPath( null, null) + "/" + ( (RestEntity) entity ).getId());
     }
 
 
     
     
-    public <T> void add( T entity, RestIndex index,  String key, Object value ) {
+    public <T> void addToIndex( T entity, RestIndex index,  String key, Object value ) {
         final RestEntity restEntity = (RestEntity) entity;
         final String indexPath = index.indexPath(key, value);
         try {
