@@ -50,13 +50,16 @@ public class RestEntity implements PropertyContainer, UpdatableRestResult<RestEn
         return this.restRequest.getUri();
     }
     
-    public void updateFrom(RestEntity updateEntity, RestAPI restApi){
+    public void updateFrom(RestEntity updateEntity, RestAPI restApi){  
+        if (this == updateEntity){
+            this.lastTimeFetchedPropertyData = 0;
+        }
         this.restApi = restApi;
         this.restRequest = restApi.getRestRequest().with(updateEntity.getUri());
         this.structuralData = updateEntity.getStructuralData();
         this.propertyData = updateEntity.getPropertyData();    
         this.lastTimeFetchedPropertyData = System.currentTimeMillis();
-    }
+    }    
 
     Map<?, ?> getStructuralData() {
         if ( this.structuralData == null ) {
@@ -65,8 +68,8 @@ public class RestEntity implements PropertyContainer, UpdatableRestResult<RestEn
         return this.structuralData;
     }
 
-    Map<String, Object> getPropertyData() {
-        if (hasToUpdateProperties()) {
+    Map<String, Object> getPropertyData() {       
+        if (hasToUpdateProperties()) {            
         	RequestResult response = restRequest.get( "properties" );
             boolean ok = response.statusIs( Status.OK );
             if ( ok ) {
@@ -143,11 +146,10 @@ public class RestEntity implements PropertyContainer, UpdatableRestResult<RestEn
     }
 
     public void setProperty( String key, Object value ) {
-        restRequest.put( "properties/" + key, value);
-        invalidatePropertyData();
+       this.restApi.setProperty(this, key, value);
     }
 
-    private void invalidatePropertyData() {
+    public void invalidatePropertyData() {
         this.propertyData = null;
     }
 
@@ -160,7 +162,7 @@ public class RestEntity implements PropertyContainer, UpdatableRestResult<RestEn
     }
 
     public void delete() {
-        restRequest.delete( "" );
+        this.restApi.delete(this);
     }
 
     @Override
@@ -191,4 +193,8 @@ public class RestEntity implements PropertyContainer, UpdatableRestResult<RestEn
     public RestAPI getRestApi() {
 		return restApi;
 	}
+
+    public void setLastTimeFetchedPropertyData(long lastTimeFetchedPropertyData) {
+        this.lastTimeFetchedPropertyData = lastTimeFetchedPropertyData;
+    }
 }

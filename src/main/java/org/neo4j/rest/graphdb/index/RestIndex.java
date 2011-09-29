@@ -15,6 +15,10 @@ import org.neo4j.rest.graphdb.entity.RestEntity;
 public abstract class RestIndex<T extends PropertyContainer> implements Index<T> {
     private final RestRequest restRequest;
     private final String indexName;
+    public String getIndexName() {
+        return indexName;
+    }
+
     protected final RestAPI restApi;
 
     RestIndex( RestRequest restRequest, String indexName, RestAPI restApi ) {
@@ -23,31 +27,17 @@ public abstract class RestIndex<T extends PropertyContainer> implements Index<T>
         this.restApi = restApi;
     }
 
-    public String getName() {
-        return indexName;
-    }
+   
 
     private String getTypeName() {
         return getEntityType().getSimpleName().toLowerCase();
     }
 
     public void add( T entity, String key, Object value ) {
-        final RestEntity restEntity = (RestEntity) entity;
-        final String indexPath = indexPath(key, value);
-        try {
-            addToIndex(restEntity, indexPath);
-        } catch (Exception e) {
-          throw new RuntimeException(String.format("Error adding element %d %s %s to index %s", restEntity.getId(), key, value, indexName));
-        }
+       restApi.add(entity, this, key, value);
     }
 
-    private void addToIndex(RestEntity restEntity, String indexPath) {
-        String uri = restEntity.getUri();
-        final RequestResult response = restRequest.post(indexPath, uri);
-        if (response.getStatus() != 201) throw new RuntimeException("Error adding to index");
-    }
-
-    private String indexPath( String key, Object value ) {
+    public String indexPath( String key, Object value ) {
         return "index/" + getTypeName() + "/" + indexName + (key!=null? "/" + ExecutingRestRequest.encode( key ) :"") + (value!=null ? "/" + ExecutingRestRequest.encode( value ):"");
     }
     private String queryPath( String key, Object value ) {
@@ -55,24 +45,23 @@ public abstract class RestIndex<T extends PropertyContainer> implements Index<T>
     }
 
     public void remove( T entity, String key, Object value ) {
-        final String indexPath = indexPath(key, value) + "/" + ((RestEntity) entity).getId();
-        deleteIndex(indexPath);
-    }
-
-    private void deleteIndex(String indexPath) {
-        restRequest.delete(indexPath);
-    }
+       restApi.remove(this, entity, key, value);
+    }  
 
     public void remove(T entity, String key) {
-        deleteIndex(indexPath(key, null) + "/" + ((RestEntity) entity).getId());
+       restApi.remove(this, entity, key);
     }
 
-    public void remove(T entity) {
-        deleteIndex(indexPath( null, null) + "/" + ( (RestEntity) entity ).getId());
+    public void remove(T entity) {       
+        restApi.remove(this, entity);
     }
 
     public void delete() {
-        deleteIndex(indexPath(null,null));
+       restApi.delete(this);
+    }
+    
+    public void deleteIndex(String indexPath) {
+        restApi.deleteIndex(this, indexPath);
     }
 
     public org.neo4j.graphdb.index.IndexHits<T> get( String key, Object value ) {
@@ -91,6 +80,16 @@ public abstract class RestIndex<T extends PropertyContainer> implements Index<T>
             value = ((QueryContext)value).getQueryOrQueryObject();
         }
         return query("null",value);
+    }
+    
+    public String getName() {
+        return indexName;
+    }
+
+
+
+    public RestRequest getRestRequest() {
+        return restRequest;
     }
 
 }

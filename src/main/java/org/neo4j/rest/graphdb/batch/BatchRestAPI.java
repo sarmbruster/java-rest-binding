@@ -13,10 +13,13 @@ import org.neo4j.rest.graphdb.RestAPI;
 import org.neo4j.rest.graphdb.RestRequest;
 import org.neo4j.rest.graphdb.converter.RelationshipIterableConverter;
 import org.neo4j.rest.graphdb.converter.RestEntityExtractor;
+import org.neo4j.rest.graphdb.converter.RestEntityPropertyRefresher;
 import org.neo4j.rest.graphdb.converter.RestIndexHitsConverter;
+import org.neo4j.rest.graphdb.entity.RestEntity;
 import org.neo4j.rest.graphdb.entity.RestNode;
 import org.neo4j.rest.graphdb.entity.RestRelationship;
 import org.neo4j.rest.graphdb.index.IndexInfo;
+import org.neo4j.rest.graphdb.index.RestIndex;
 import org.neo4j.rest.graphdb.index.SimpleIndexHits;
 
 import java.util.Map;
@@ -49,18 +52,7 @@ public class BatchRestAPI extends RestAPI {
         (getRecordingRequest()).getOperations().addToRestOperation(batchId, node, new RestEntityExtractor(this));
         return node;
     }
-       
-    @Override
-    public RestRelationship createRelationship(Node startNode, Node endNode, RelationshipType type, Map<String, Object> props) {          
-        final RestRequest restRequest = ((RestNode)startNode).getRestRequest();
-        Map<String, Object> data = MapUtil.map("to", ((RestNode)endNode).getUri(), "type", type.name());
-        if (props!=null && props.size()>0) {
-            data.put("data",props);
-        }          
-        //RequestResult requestResult = restRequest.post(restRequest.getUri()+"/relationships", data);
-        RequestResult requestResult = restRequest.post( "relationships", data);
-        return createRestRelationship(requestResult, startNode);
-    }
+          
     
     @Override
     public RestRelationship createRestRelationship(RequestResult requestResult, Node startNode) {          
@@ -96,11 +88,25 @@ public class BatchRestAPI extends RestAPI {
         final SimpleIndexHits<S> result = new SimpleIndexHits<S>(batchId, entityType, this);
         getRecordingRequest().getOperations().addToRestOperation(batchId, result, new RestIndexHitsConverter(this,entityType));
         return result;
-    }
+    }    
+   
 
     public  IndexInfo indexInfo(final String indexType) {
         return new BatchIndexInfo();
     }
+     
+    @Override
+    public void setProperty( RestEntity entity, String key, Object value ) {       
+        RequestResult response = entity.getRestRequest().put( "properties/" + key, value);
+        final long batchId = response.getBatchId();     
+        getRecordingRequest().getOperations().addToRestOperation(batchId, entity, new RestEntityPropertyRefresher(entity));       
+    }
+    
+    @Override
+    protected void addToIndex(RestEntity restEntity, RestRequest request, String indexPath) {       
+        String uri = restEntity.getUri();
+        final RequestResult response = request.post(indexPath, uri);       
+    }   
 
     private static class BatchIndexInfo implements IndexInfo {
 

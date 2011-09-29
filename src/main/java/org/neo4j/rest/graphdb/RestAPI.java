@@ -13,9 +13,11 @@ import org.neo4j.rest.graphdb.batch.RestOperations.RestOperation;
 import org.neo4j.rest.graphdb.converter.RelationshipIterableConverter;
 import org.neo4j.rest.graphdb.converter.RestEntityExtractor;
 import org.neo4j.rest.graphdb.converter.RestIndexHitsConverter;
+import org.neo4j.rest.graphdb.entity.RestEntity;
 import org.neo4j.rest.graphdb.entity.RestNode;
 import org.neo4j.rest.graphdb.entity.RestRelationship;
 import org.neo4j.rest.graphdb.index.IndexInfo;
+import org.neo4j.rest.graphdb.index.RestIndex;
 import org.neo4j.rest.graphdb.index.RestIndexManager;
 import org.neo4j.rest.graphdb.index.RetrievedIndexInfo;
 import org.neo4j.rest.graphdb.index.SimpleIndexHits;
@@ -155,7 +157,9 @@ public class RestAPI {
         T batchResult = batchCallback.recordBatch(batchRestApi);
         batchRestApi.stop();
         RestOperations operations = batchRestApi.getRecordedOperations();
-        RequestResult response = this.restRequest.post("batch", createBatchRequestData(operations));
+        System.out.println( createBatchRequestData(operations).toString());
+        RequestResult response = this.restRequest.post("batch", createBatchRequestData(operations));    
+        System.out.println(response.getEntity());
         Map<Long, Object> mappedObjects = convertRequestResultToEntities(operations, response);
         updateRestOperations(operations, mappedObjects);
         return batchResult;
@@ -170,7 +174,7 @@ public class RestAPI {
             if (operation.isSameUri(baseUri)) {
                 params.put("to", operation.getUri());
             } else {
-                params.put("to", operation.getBaseUri() + "/" + operation.getUri()); // todo kapseln und op.getUri pruefen dass es nicht mit slash anfaengt
+                params.put("to",createOperationUri(operation)); 
             }
             if (operation.getData() != null) {
                 params.put("body", operation.getData());
@@ -179,6 +183,15 @@ public class RestAPI {
             batch.add(params);
         }
         return batch;
+    }
+    
+    private String createOperationUri(RestOperation operation){
+        String uri =  operation.getBaseUri();
+        String suffix = operation.getUri();
+        if (suffix.startsWith("/")){
+            return uri + suffix;
+        }
+        return uri + "/" + suffix;
     }
 
     private Map<Long, Object> convertRequestResultToEntities(RestOperations operations, RequestResult response) {
@@ -190,10 +203,13 @@ public class RestAPI {
         Map<Long, Object> mappedObjects = new HashMap<Long, Object>(responseCollection.size());
         for (Map<String, Object> entry : responseCollection) {
             final Long batchId = getBatchId(entry);
-            final RequestResult subResult = RequestResult.extractFrom(entry);
+            final RequestResult subResult = RequestResult.extractFrom(entry);      
             RestOperation restOperation = operations.getOperation(batchId);
-            Object entity = restOperation.getResultConverter().convertFromRepresentation(subResult);
-            mappedObjects.put(batchId, entity);
+            if (restOperation.getEntity() != null){
+                Object entity = restOperation.getResultConverter().convertFromRepresentation(subResult);
+                mappedObjects.put(batchId, entity);
+            }
+           
         }
         return mappedObjects;
     }
@@ -226,10 +242,59 @@ public class RestAPI {
             return new SimpleIndexHits<S>(Collections.emptyList(), 0, entityType, this);
         }
     }
-
+    
+    public void delete(RestEntity entity) {
+        entity.getRestRequest().delete( "" );
+    }
     public IndexInfo indexInfo(final String indexType) {
         RequestResult response = restRequest.get("index/" + indexType);
         return new RetrievedIndexInfo(response);
     }
+    
+    public void setProperty( RestEntity entity, String key, Object value ) {
+        entity.getRestRequest().put( "properties/" + key, value);
+        entity.invalidatePropertyData();
+    }
+    
+    
+    public void deleteIndex(RestIndex index, String indexPath) {
+        index.getRestRequest().delete(indexPath);
+    }
+    
+    public void delete(RestIndex index) {
+        deleteIndex(index, index.indexPath(null,null));
+    }
+    
+    public <T> void remove( RestIndex index, T entity, String key, Object value ) {
+        final String indexPath = index.indexPath(key, value) + "/" + ((RestEntity) entity).getId();
+        deleteIndex(index,indexPath);
+    }  
+
+    public <T> void remove(RestIndex index, T entity, String key) {
+        deleteIndex(index, index.indexPath(key, null) + "/" + ((RestEntity) entity).getId());
+    }
+
+    public <T> void remove(RestIndex index, T entity) {       
+        deleteIndex(index, index.indexPath( null, null) + "/" + ( (RestEntity) entity ).getId());
+    }
+
+
+    
+    
+    public <T> void add( T entity, RestIndex index,  String key, Object value ) {
+        final RestEntity restEntity = (RestEntity) entity;
+        final String indexPath = index.indexPath(key, value);
+        try {
+            addToIndex(restEntity, index.getRestRequest(), indexPath);
+        } catch (Exception e) {
+          throw new RuntimeException(String.format("Error adding element %d %s %s to index %s", restEntity.getId(), key, value, index.getIndexName()));
+        }
+    }
+
+    protected void addToIndex(RestEntity restEntity, RestRequest request, String indexPath) {
+        String uri = restEntity.getUri();
+        final RequestResult response = request.post(indexPath, uri);
+        if (response.getStatus() != 201) throw new RuntimeException("Error adding to index");
+    }    
 
 }

@@ -84,10 +84,7 @@ public class RecordingRestRequest implements RestRequest {
     public RequestResult record(Methods method, String path, Object data, String baseUri){
         if (stop) throw new IllegalStateException("BatchRequest already executed");
         return this.operations.record(method, path, data,baseUri);
-    }
-    
-   
-        
+    }       
 
     private String uriWithoutSlash( String uri ) {
         String uriString = uri;
