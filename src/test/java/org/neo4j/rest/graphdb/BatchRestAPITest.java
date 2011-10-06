@@ -213,34 +213,55 @@ public class BatchRestAPITest extends RestTestBase {
             Assert.assertFalse( index.existsForNodes("heroes"));
     }
     
-    /**
-    @Test
+    
+    @Test  (expected = UnsupportedOperationException.class)
     public void testRemoveEntryFromIndexWithGivenNode(){
         TestBatchResult response =this.restAPI.executeBatch(new BatchCallback<TestBatchResult>() {
             
             @Override
             public TestBatchResult recordBatch(RestAPI batchRestApi) {
                 TestBatchResult result=new TestBatchResult();
-                result.n1 = batchRestApi.createNode(map("name", "node1"));              
-                result.n2 = batchRestApi.createNode(map("name", "node2"));
+                result.n1 = batchRestApi.createNode(map("name", "node1"));                
                 final Index<Node> index = batchRestApi.index().forNodes("testIndex");
                 index.add( result.n1, "indexname", "Node1");
-                index.add( result.n2, "indexname", "Node2");
                 index.remove(result.n1);
                 return result;
             }
-        });       
-        IndexManager index = getGraphDatabase().index(); 
-        Index<Node> testIndex = index.forNodes("testIndex");
-        IndexHits<Node> hits = testIndex.get( "indexname", "Node1" );
-        Assert.assertEquals("found in index results", false, hits.hasNext());
-        hits = testIndex.get( "indexname", "Node2" );
-        Assert.assertEquals("found in index results", true, hits.hasNext());
-    }*/
+        });         
+    }
     
+    @Test  (expected = UnsupportedOperationException.class)
+    public void testRemoveEntryFromIndexWithGivenNodeAndKey(){
+        TestBatchResult response =this.restAPI.executeBatch(new BatchCallback<TestBatchResult>() {
+            
+            @Override
+            public TestBatchResult recordBatch(RestAPI batchRestApi) {
+                TestBatchResult result=new TestBatchResult();
+                result.n1 = batchRestApi.createNode(map("name", "node1"));                
+                final Index<Node> index = batchRestApi.index().forNodes("testIndex");
+                index.add( result.n1, "indexname", "Node1");
+                index.remove(result.n1,"indexname");
+                return result;
+            }
+        });         
+    }
     
-    
-  
+    @Test  (expected = UnsupportedOperationException.class)
+    public void testRemoveEntryFromIndexWithGivenNodeAndKeyAndValue(){
+        TestBatchResult response =this.restAPI.executeBatch(new BatchCallback<TestBatchResult>() {
+            
+            @Override
+            public TestBatchResult recordBatch(RestAPI batchRestApi) {
+                TestBatchResult result=new TestBatchResult();
+                result.n1 = batchRestApi.createNode(map("name", "node1"));                
+                final Index<Node> index = batchRestApi.index().forNodes("testIndex");
+                index.add( result.n1, "indexname", "Node1");
+                index.remove(result.n1,"indexname", "Node1");
+                return result;
+            }
+        });         
+    }
+     
     static class TestBatchResult {
         Node n1;
         Node n2;

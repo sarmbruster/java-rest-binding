@@ -55,6 +55,10 @@ public abstract class RestIndex<T extends PropertyContainer> implements Index<T>
     public void add( T entity, String key, Object value ) {
        restApi.addToIndex(entity, this, key, value);
     }
+    
+    public String indexPath( ) {
+        return "index/" + getTypeName() + "/" + indexName;
+    }
 
     public String indexPath( String key, Object value ) {
         return "index/" + getTypeName() + "/" + indexName + (key!=null? "/" + ExecutingRestRequest.encode( key ) :"") + (value!=null ? "/" + ExecutingRestRequest.encode( value ):"");

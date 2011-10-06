@@ -36,6 +36,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class ExecutingRestRequest implements RestRequest {
@@ -163,5 +164,15 @@ public class ExecutingRestRequest implements RestRequest {
     @Override
     public String getUri() {
         return baseUri;
+    }
+
+	@Override
+	public Map<?, ?> toMap(RequestResult requestResult) {	
+	   final String json = entityString(requestResult);
+	    return JsonHelper.jsonToMap(json);	   
+	}
+	
+	public String entityString( RequestResult requestResult) {
+        return requestResult.getEntity();
     }
 }

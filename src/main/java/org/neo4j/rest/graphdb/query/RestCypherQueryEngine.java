@@ -27,6 +27,7 @@ import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.rest.graphdb.RequestResult;
 import org.neo4j.rest.graphdb.RestAPI;
 import org.neo4j.rest.graphdb.RestRequest;
+import org.neo4j.rest.graphdb.RestResultException;
 import org.neo4j.rest.graphdb.converter.RestEntityExtractor;
 import org.neo4j.rest.graphdb.converter.RestTableResultExtractor;
 import org.neo4j.rest.graphdb.util.ConvertedResult;
@@ -35,7 +36,6 @@ import org.neo4j.rest.graphdb.util.Handler;
 import org.neo4j.rest.graphdb.util.QueryResult;
 import org.neo4j.rest.graphdb.util.QueryResultBuilder;
 import org.neo4j.rest.graphdb.util.ResultConverter;
-
 
 public class RestCypherQueryEngine implements QueryEngine<Map<String,Object>> {
     private final RestRequest restRequest;
@@ -50,13 +50,15 @@ public class RestCypherQueryEngine implements QueryEngine<Map<String,Object>> {
         this.resultConverter = resultConverter!=null ? resultConverter : new DefaultConverter();
         this.restRequest = restApi.getRestRequest();
     }
-
+    
     @Override
     public QueryResult<Map<String, Object>> query(String statement, Map<String, Object> params) {
-        final String parametrizedStatement = QueryResultBuilder.replaceParams(statement, params);
-        final RequestResult requestResult = restRequest.get("ext/CypherPlugin/graphdb/execute_query", MapUtil.map("query", parametrizedStatement));
-        return new RestQueryResult(requestResult.toMap(),restApi,resultConverter);
+        final RequestResult requestResult = restRequest.get("ext/CypherPlugin/graphdb/execute_query", MapUtil.map("query", statement, "params", params));
+        final Map<?, ?> resultMap = restRequest.toMap(requestResult);
+        if (RestResultException.isExceptionResult(resultMap)) throw new RestResultException(resultMap);
+        return new RestQueryResult(resultMap,restApi,resultConverter);
     }
+
 
     static class RestQueryResult implements QueryResult<Map<String,Object>> {
         QueryResultBuilder<Map<String,Object>> result;

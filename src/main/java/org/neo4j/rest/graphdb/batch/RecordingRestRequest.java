@@ -30,6 +30,7 @@ import org.neo4j.rest.graphdb.RequestResult;
 import org.neo4j.rest.graphdb.RestRequest;
 import org.neo4j.rest.graphdb.batch.RestOperations.RestOperation;
 import org.neo4j.rest.graphdb.batch.RestOperations.RestOperation.Methods;
+import org.neo4j.rest.graphdb.util.JsonHelper;
 
 
 
@@ -129,6 +130,16 @@ public class RecordingRestRequest implements RestRequest {
 
     public String getBaseUri() {
         return baseUri;
+    }
+
+    @Override
+	public Map<?, ?> toMap(RequestResult requestResult) {	
+	   final String json = entityString(requestResult);
+	    return JsonHelper.jsonToMap(json);	   
+	}
+	
+	public String entityString( RequestResult requestResult) {
+        return requestResult.getEntity();
     }
 }
 

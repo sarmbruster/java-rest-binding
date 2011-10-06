@@ -49,4 +49,9 @@ public class RestRelationshipIndex extends RestIndex<Relationship> implements Re
     public org.neo4j.graphdb.index.IndexHits<Relationship> query( Object o, Node node, Node node1 ) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public boolean isWriteable() {       
+        return true;
+    }
 }

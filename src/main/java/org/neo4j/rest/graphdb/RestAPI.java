@@ -25,6 +25,7 @@ import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.index.impl.lucene.LuceneIndexImplementation;
+import org.neo4j.index.lucene.ValueContext;
 import org.neo4j.rest.graphdb.batch.BatchCallback;
 import org.neo4j.rest.graphdb.batch.BatchRestAPI;
 import org.neo4j.rest.graphdb.batch.RestOperations;
@@ -175,7 +176,7 @@ public class RestAPI {
         BatchRestAPI batchRestApi = new BatchRestAPI(this.restRequest.getUri(), (ExecutingRestRequest) this.restRequest);
         T batchResult = batchCallback.recordBatch(batchRestApi);
         batchRestApi.stop();
-        RestOperations operations = batchRestApi.getRecordedOperations();      
+        RestOperations operations = batchRestApi.getRecordedOperations();         
         RequestResult response = this.restRequest.post("batch", createBatchRequestData(operations));      
         Map<Long, Object> mappedObjects = convertRequestResultToEntities(operations, response);
         updateRestOperations(operations, mappedObjects);
@@ -308,23 +309,18 @@ public class RestAPI {
         deleteIndex(index, index.indexPath( null, null) + "/" + ( (RestEntity) entity ).getId());
     }
 
-
-    
     
     public <T> void addToIndex( T entity, RestIndex index,  String key, Object value ) {
         final RestEntity restEntity = (RestEntity) entity;
-        final String indexPath = index.indexPath(key, value);
-        try {
-            addToIndex(restEntity, index.getRestRequest(), indexPath);
-        } catch (Exception e) {
-          throw new RuntimeException(String.format("Error adding element %d %s %s to index %s", restEntity.getId(), key, value, index.getIndexName()));
+        String uri = restEntity.getUri();       
+        if (value instanceof ValueContext) {
+            value = ((ValueContext)value).getCorrectValue();
         }
+        final Map<String, Object> data = MapUtil.map("key", key, "value", value, "uri", uri);       
+        final RequestResult result = index.getRestRequest().post(index.indexPath(), data);       
+        if (result.getStatus()!=201) throw new RuntimeException(String.format("Error adding element %d %s %s to index %s", restEntity.getId(), key, value, index.getIndexName()));
     }
-
-    protected void addToIndex(RestEntity restEntity, RestRequest request, String indexPath) {
-        String uri = restEntity.getUri();
-        final RequestResult response = request.post(indexPath, uri);
-        if (response.getStatus() != 201) throw new RuntimeException("Error adding to index");
-    }    
+      
+   
 
 }

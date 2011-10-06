@@ -25,6 +25,7 @@ import org.neo4j.kernel.Config;
 import org.neo4j.kernel.RestConfig;
 import org.neo4j.rest.graphdb.index.RestIndexManager;
 import java.net.URI;
+import java.util.Collection;
 
 
 public class RestGraphDatabase extends AbstractRemoteDatabase {   
@@ -89,6 +90,11 @@ public class RestGraphDatabase extends AbstractRemoteDatabase {
     @Override
     public Config getConfig() {
         return new RestConfig(this);
+    }
+
+    @Override
+    public <T> Collection<T> getManagementBeans(Class<T> tClass) {
+        return null;
     }
 
     @Override

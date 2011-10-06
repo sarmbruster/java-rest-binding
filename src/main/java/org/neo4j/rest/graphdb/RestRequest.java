@@ -19,7 +19,7 @@
  */
 package org.neo4j.rest.graphdb;
 
-import java.net.URI;
+import java.util.Map;
 
 public interface RestRequest {
 
@@ -36,5 +36,7 @@ public interface RestRequest {
     RestRequest with(String uri);
 
     String getUri();
+    
+    Map<?, ?> toMap( RequestResult requestResult);
 
 }

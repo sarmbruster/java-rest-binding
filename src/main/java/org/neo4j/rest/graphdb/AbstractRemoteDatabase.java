@@ -75,11 +75,11 @@ abstract class AbstractRemoteDatabase extends AbstractGraphDatabase {
     public Iterable<RelationshipType> getRelationshipTypes() {
         throw new UnsupportedOperationException();
     }
-    
+    /**
     @Override
     public <T> T getManagementBean(Class<T> type) {
         return null;
-    }
+    } */
     
     public void shutdown() {
     }

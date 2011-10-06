@@ -26,6 +26,7 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.helpers.collection.MapUtil;
+import org.neo4j.index.lucene.ValueContext;
 import org.neo4j.rest.graphdb.ExecutingRestRequest;
 import org.neo4j.rest.graphdb.RequestResult;
 import org.neo4j.rest.graphdb.RestAPI;
@@ -122,10 +123,31 @@ public class BatchRestAPI extends RestAPI {
     }
     
     @Override
-    protected void addToIndex(RestEntity restEntity, RestRequest request, String indexPath) {       
+    public <T> void addToIndex( T entity, RestIndex index,  String key, Object value ) {
+        final RestEntity restEntity = (RestEntity) entity;
         String uri = restEntity.getUri();
-        final RequestResult response = request.post(indexPath, uri);       
-    }   
+        if (value instanceof ValueContext) {
+            value = ((ValueContext)value).getCorrectValue();
+        }
+        final Map<String, Object> data = MapUtil.map("key", key, "value", value, "uri", uri);
+        final RequestResult result = restRequest.post(index.indexPath(), data);        
+    }
+    
+    @Override
+    public <T> void removeFromIndex(RestIndex index, T entity) {       
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public <T> void removeFromIndex( RestIndex index, T entity, String key, Object value ) {
+        throw new UnsupportedOperationException();
+    }  
+    
+    @Override
+    public <T> void removeFromIndex(RestIndex index, T entity, String key) {
+        throw new UnsupportedOperationException();
+    }
+         
 
     private static class BatchIndexInfo implements IndexInfo {
 

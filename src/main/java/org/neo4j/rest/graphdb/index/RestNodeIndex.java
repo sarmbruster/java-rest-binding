@@ -36,4 +36,9 @@ public class RestNodeIndex extends RestIndex<Node> {
         return Node.class;
     }
 
+    @Override
+    public boolean isWriteable() {       
+        return true;
+    }
+
 }
