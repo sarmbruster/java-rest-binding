@@ -11,7 +11,7 @@
     <groupId>org.neo4j</groupId>
     <artifactId>neo4j-rest-graphdb</artifactId>
     <packaging>jar</packaging>
-    <version>0.2001-SNAPSHOT</version>
+    <version>1.5-SNAPSHOT</version>
     <name>Rest GraphDatabaseService Wrapper</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

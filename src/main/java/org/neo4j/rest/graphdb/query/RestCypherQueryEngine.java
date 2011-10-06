@@ -60,7 +60,7 @@ public class RestCypherQueryEngine implements QueryEngine<Map<String,Object>> {
     }
 
 
-    static class RestQueryResult implements QueryResult<Map<String,Object>> {
+    public static class RestQueryResult implements QueryResult<Map<String,Object>> {
         QueryResultBuilder<Map<String,Object>> result;
 
         @Override
