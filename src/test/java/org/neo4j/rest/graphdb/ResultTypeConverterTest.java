@@ -79,8 +79,12 @@ public class ResultTypeConverterTest extends RestTestBase {
         path.put("length",1);
         path.put("relationships", asList(relationship1));
         path.put("end", node2);
-        Object result = converter.convertToResultType(path, new TypeInformation(Path.class));
+        Path result = (Path)converter.convertToResultType(path, new TypeInformation(Path.class));
+
         assertEquals(SimplePath.class, result.getClass());
+        assertEquals(1, result.startNode().getId());
+        assertEquals(2, result.endNode().getId());
+        assertEquals(1, result.lastRelationship().getId());
     }
 
 
