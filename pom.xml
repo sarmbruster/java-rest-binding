@@ -85,6 +85,11 @@ the relevant Commercial Agreement.
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
+            <artifactId>server-api</artifactId>
+            <version>${neo4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.neo4j</groupId>
             <artifactId>neo4j-kernel</artifactId>
             <version>${neo4j.version}</version>
         </dependency>
@@ -239,4 +244,3 @@ the relevant Commercial Agreement.
   </distributionManagement>
 
 </project>
-
