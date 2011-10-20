@@ -36,11 +36,10 @@ import org.neo4j.rest.graphdb.converter.RestIndexHitsConverter;
 import org.neo4j.rest.graphdb.entity.RestEntity;
 import org.neo4j.rest.graphdb.entity.RestNode;
 import org.neo4j.rest.graphdb.entity.RestRelationship;
-import org.neo4j.rest.graphdb.index.IndexInfo;
-import org.neo4j.rest.graphdb.index.RestIndex;
-import org.neo4j.rest.graphdb.index.RestIndexManager;
-import org.neo4j.rest.graphdb.index.RetrievedIndexInfo;
-import org.neo4j.rest.graphdb.index.SimpleIndexHits;
+import org.neo4j.rest.graphdb.index.*;
+import org.neo4j.rest.graphdb.services.PluginInvocation;
+import org.neo4j.rest.graphdb.services.RestInvocationHandler;
+import org.neo4j.rest.graphdb.services.ServiceInvocation;
 import org.neo4j.rest.graphdb.traversal.RestTraversal;
 import org.neo4j.rest.graphdb.util.JsonHelper;
 
@@ -321,6 +320,13 @@ public class RestAPI {
         if (result.getStatus()!=201) throw new RuntimeException(String.format("Error adding element %d %s %s to index %s", restEntity.getId(), key, value, index.getIndexName()));
     }
       
-   
+
+     public <T> T getPlugin(Class<T> type){
+        return RestInvocationHandler.getInvocationProxy(type, this, new PluginInvocation(this, type));
+     }
+
+     public <T> T getService(Class<T> type, String baseUri){
+        return RestInvocationHandler.getInvocationProxy(type, this, new ServiceInvocation(this, type, baseUri));
+     }
 
 }
