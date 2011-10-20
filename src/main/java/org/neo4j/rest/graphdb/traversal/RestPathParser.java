@@ -24,6 +24,7 @@ import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.helpers.collection.IterableWrapper;
 import org.neo4j.rest.graphdb.RestAPI;
+import org.neo4j.rest.graphdb.converter.TypeInformation;
 import org.neo4j.rest.graphdb.entity.RestNode;
 import org.neo4j.rest.graphdb.entity.RestRelationship;
 
@@ -36,7 +37,23 @@ import java.util.Map;
  * @since 03.02.11
  */
 public class RestPathParser {
-    public static Path parse(Map path, final RestAPI restApi) {
+
+
+     public static Path parse(Map path, final RestAPI restApi) {
+         TypeInformation typeInfo = new TypeInformation(path.get("nodes"));
+         if ( Map.class.isAssignableFrom(typeInfo.getGenericArguments()[0])){
+            return parseFullPath(path, restApi);
+         }
+         if (typeInfo.getGenericArguments()[0].equals(String.class)){
+             return parsePath(path, restApi);
+         }
+
+         throw new IllegalArgumentException("params map contained illegal type "+typeInfo.getGenericArguments()[0]);
+    }
+
+
+
+    private static Path parseFullPath(Map path, final RestAPI restApi) {
         final Collection<Map<?, ?>> nodesData = (Collection<Map<?, ?>>) path.get("nodes");
         final Collection<Map<?, ?>> relationshipsData = (Collection<Map<?, ?>>) path.get("relationships");
         final Map<?, ?> lastRelationshipData = lastElement(relationshipsData);
@@ -61,6 +78,42 @@ public class RestPathParser {
                         return new RestRelationship(data,restApi);
                     }
                 });
+    }
+
+    private static Path parsePath(Map path, final RestAPI restApi){
+        final Collection<String> nodesData = (Collection<String>) path.get("nodes");
+        final Collection<String> relationshipsData = (Collection<String>) path.get("relationships");
+        final String lastRelationshipData = lastElement(relationshipsData);
+        final String startData = (String) path.get("start");
+        final String endData = (String) path.get("end");
+        final Integer length = (Integer) path.get("length");
+        return new SimplePath(
+                new RestNode(startData,restApi),
+                new RestNode(endData,restApi),
+                new RestRelationship(lastRelationshipData,restApi),
+                length,
+                new IterableWrapper<Node, String>(nodesData) {
+                    @Override
+                    protected Node underlyingObjectToObject(String data) {
+                        return new RestNode(data,restApi);
+                    }
+                },
+                new IterableWrapper<Relationship, String>(relationshipsData) {
+                    @Override
+                    protected Relationship underlyingObjectToObject(String data) {
+                        return new RestRelationship(data,restApi);
+                    }
+                });
+    }
+
+    private static String lastElement(Collection<String> collection){
+       if (collection.isEmpty()) return null;
+       if (collection instanceof List) {
+            List<String> list = (List<String>) collection;
+            return list.get(list.size()-1);
+       }
+
+       return null;
     }
 
     private static Map<?, ?> lastElement(Collection<Map<?, ?>> collection) {
