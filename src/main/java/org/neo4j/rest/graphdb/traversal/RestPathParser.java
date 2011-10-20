@@ -23,7 +23,9 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.helpers.collection.IterableWrapper;
+import org.neo4j.rest.graphdb.RequestResult;
 import org.neo4j.rest.graphdb.RestAPI;
+import org.neo4j.rest.graphdb.converter.RestResultConverter;
 import org.neo4j.rest.graphdb.converter.TypeInformation;
 import org.neo4j.rest.graphdb.entity.RestNode;
 import org.neo4j.rest.graphdb.entity.RestRelationship;
@@ -36,10 +38,15 @@ import java.util.Map;
  * @author Michael Hunger
  * @since 03.02.11
  */
-public class RestPathParser {
+public class RestPathParser implements RestResultConverter {
 
+     private RestAPI restAPI;
 
-     public static Path parse(Map path, final RestAPI restApi) {
+    public RestPathParser(RestAPI restAPI) {
+        this.restAPI = restAPI;
+    }
+
+    public static Path parse(Map path, final RestAPI restApi) {
          TypeInformation typeInfo = new TypeInformation(path.get("nodes"));
          if ( Map.class.isAssignableFrom(typeInfo.getGenericArguments()[0])){
             return parseFullPath(path, restApi);
@@ -127,5 +134,10 @@ public class RestPathParser {
             result=value;
         }
         return result;
+    }
+
+    @Override
+    public Object convertFromRepresentation(RequestResult value) {
+        return parse(value.toMap(), this.restAPI);
     }
 }
