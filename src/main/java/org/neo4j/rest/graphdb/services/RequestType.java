@@ -50,7 +50,7 @@ enum RequestType {
     GET {
         @Override
         RequestResult makeRequest(String uri, Map<String, Object> requestParams, RestRequest restRequest) {
-           return restRequest.get(uri, requestParams);
+           return restRequest.get(uri);
         }
     },
     DELETE {

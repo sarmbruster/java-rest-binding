@@ -20,43 +20,18 @@
 
 package org.neo4j.rest.graphdb.extension;
 
-import org.neo4j.graphdb.GraphDatabaseService;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-//START SNIPPET: HelloWorldResource
-@Path( "/helloworld" )
-public class HelloWorldResource
-{
-    private  GraphDatabaseService database;
-
-
-    public HelloWorldResource(){
-        System.out.println("in empty cons");
-
-    }
-
-    public HelloWorldResource( @Context GraphDatabaseService database )
-    {
-        System.out.println("in constructor");
-        this.database = database;
-    }
+@Path("/helloworld")
+public class HelloWorldResource {
 
     @GET
-    @Produces( MediaType.TEXT_PLAIN )
-    @Path( "/{nodeId}" )
-    public Response hello( @PathParam( "nodeId" ) long nodeId )
-    {
-        // Do stuff with the database
-        return Response.status( Status.OK ).entity(
-                ( "Hello World, nodeId=" + nodeId ).getBytes() ).build();
+    @Path("/{nodeId}")
+    public Response hello(@PathParam("nodeId") long nodeId) {
+        return Response.status(Status.OK).entity(("\"Hello World, nodeId=" + nodeId+"\"").getBytes()).build();
     }
 }
-// END SNIPPET: HelloWorldResource

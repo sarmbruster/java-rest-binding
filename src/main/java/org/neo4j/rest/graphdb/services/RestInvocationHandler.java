@@ -21,6 +21,7 @@ package org.neo4j.rest.graphdb.services;
 
 import org.neo4j.rest.graphdb.RequestResult;
 import org.neo4j.rest.graphdb.RestAPI;
+import org.neo4j.rest.graphdb.RestResultException;
 import org.neo4j.rest.graphdb.converter.ResultTypeConverter;
 import org.neo4j.rest.graphdb.converter.TypeInformation;
 import org.neo4j.rest.graphdb.util.JsonHelper;
@@ -36,11 +37,13 @@ import java.lang.reflect.Proxy;
  */
 public class RestInvocationHandler implements InvocationHandler{
 
+    private final Class<?> type;
     private RestAPI restAPI;
     private RemoteInvocationStrategy invocationStrategy;
     private ResultTypeConverter resultTypeConverter;
 
-    public RestInvocationHandler(RestAPI restAPI, RemoteInvocationStrategy invocationStrategy) {
+    public RestInvocationHandler(Class<?> type, RestAPI restAPI, RemoteInvocationStrategy invocationStrategy) {
+        this.type = type;
         this.restAPI = restAPI;
         this.resultTypeConverter = new ResultTypeConverter(this.restAPI);
         this.invocationStrategy = invocationStrategy;
@@ -50,7 +53,13 @@ public class RestInvocationHandler implements InvocationHandler{
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        if (!type.isAssignableFrom(method.getDeclaringClass())) {
+            System.out.println("method = " + method);
+            return method.invoke(this,args);
+        }
         final RequestResult requestResult = invocationStrategy.invoke(method,args);
+        final int status = requestResult.getStatus();
+        if (status!=200) throw new RuntimeException(requestResult.getEntity());
         Object obj = JsonHelper.readJson(requestResult.getEntity());
         TypeInformation typeInfo = new TypeInformation( method.getGenericReturnType());
         return this.resultTypeConverter.convertToResultType(obj, typeInfo);
@@ -59,7 +68,7 @@ public class RestInvocationHandler implements InvocationHandler{
 
 
    public static <T> T getInvocationProxy(Class<T> type, RestAPI restAPI, RemoteInvocationStrategy invocationStrategy){
-      return (T) Proxy.newProxyInstance(type.getClassLoader(), new Class[]{type}, new RestInvocationHandler(restAPI, invocationStrategy));
+      return (T) Proxy.newProxyInstance(type.getClassLoader(), new Class[]{type}, new RestInvocationHandler(type,restAPI, invocationStrategy));
    }
 
 

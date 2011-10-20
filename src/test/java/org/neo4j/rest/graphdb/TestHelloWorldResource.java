@@ -20,17 +20,15 @@
 package org.neo4j.rest.graphdb;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import javax.ws.rs.core.Response;
+import static org.junit.Assert.assertEquals;
 
 /**
  * User: KBurchardi
  * Date: 20.10.11
  * Time: 12:44
  */
-@Ignore
 public class TestHelloWorldResource extends RestTestBase {
      private RestAPI restAPI;
 
@@ -41,13 +39,7 @@ public class TestHelloWorldResource extends RestTestBase {
 
     @Test
     public void testHelloWorldService() throws Exception {
-        HelloWorldService hws = this.restAPI.getService(HelloWorldService.class, SERVER_ROOT_URI+"test");
-        Response response = hws.hello(0);
+        HelloWorldService hws = this.restAPI.getService(HelloWorldService.class, SERVER_ROOT+"/test");
+        assertEquals("Hello World, nodeId=0", hws.hello(0));
     }
-    /**
-    @Test
-    public void dummy() {
-        RequestResult result = this.restAPI.getRestRequest().get("test/helloworld/0");
-        assertEquals("Hello World, nodeId=0", result.getEntity());
-    }  */
 }

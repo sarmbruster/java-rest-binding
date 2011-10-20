@@ -38,8 +38,9 @@ public class RestTestBase {
     private static final String HOSTNAME = "localhost";
     private static final int PORT = 7474;
     private static LocalTestServer neoServer = new LocalTestServer(HOSTNAME,PORT).withPropertiesFile("neo4j-server.properties");
-    protected static final String SERVER_ROOT_URI = "http://" + HOSTNAME + ":" + PORT + "/db/data/";
-    private static final String SERVER_CLEANDB_URI = "http://" + HOSTNAME + ":" + PORT + "/cleandb/secret-key";
+    public static final String SERVER_ROOT = "http://" + HOSTNAME + ":" + PORT;
+    protected static final String SERVER_ROOT_URI = SERVER_ROOT + "/db/data/";
+    private static final String SERVER_CLEANDB_URI = SERVER_ROOT + "/cleandb/secret-key";
     private static final String CONFIG = RestTestBase.class.getResource("/neo4j-server.properties").getFile();
 
     @BeforeClass
