@@ -1,19 +1,18 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
          <parent>
              <groupId>org.neo4j.build</groupId>
              <artifactId>parent-pom</artifactId>
              <version>25</version>
-             <relativePath/>
+             <relativePath />
            </parent>
     
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.neo4j</groupId>
     <artifactId>neo4j-rest-graphdb</artifactId>
     <packaging>jar</packaging>
-    <version>1.5-SNAPSHOT</version>
+    <version>1.5.M02</version>
     <name>Neo4j - Rest GraphDatabaseService Wrapper</name>
-    <description>Neo4j REST binding implementing the GraphDatabaseService interface.</description>>
+    <description>Neo4j REST binding implementing the GraphDatabaseService interface.</description>&gt;
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <slf4j.version>1.6.1</slf4j.version>
