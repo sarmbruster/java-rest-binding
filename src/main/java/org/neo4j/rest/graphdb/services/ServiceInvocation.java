@@ -21,7 +21,6 @@ package org.neo4j.rest.graphdb.services;
 
 import org.neo4j.rest.graphdb.RequestResult;
 import org.neo4j.rest.graphdb.RestAPI;
-import org.neo4j.rest.graphdb.RestRequest;
 
 import javax.ws.rs.*;
 import java.lang.annotation.Annotation;
@@ -36,13 +35,6 @@ import java.util.Map;
  */
 public class ServiceInvocation implements RemoteInvocationStrategy{
 
-    enum RequestType {
-        PUT,
-        POST,
-        GET,
-        DELETE
-    }
-
     private RestAPI restAPI;
     private String baseUri;
     private Class<?> targetClass;
@@ -56,49 +48,9 @@ public class ServiceInvocation implements RemoteInvocationStrategy{
     @Override
     public RequestResult invoke(Method method, Object[] args) {
 
-       return makeRequest(determineRequestType(method), method, args);
+       return RequestType.determineRequestType(method).makeRequest(createUri(method, args), getRequestParams(method, args), this.restAPI.getRestRequest());
     }
 
-    private RequestResult makeRequest(RequestType requestType, Method method, Object[] args){
-        RestRequest restRequest = this.restAPI.getRestRequest();
-        if (requestType.equals(RequestType.GET)){
-           return restRequest.get(createUri(method,args), getRequestParams(method, args));
-        }
-
-        if (requestType.equals(RequestType.PUT)){
-            return restRequest.put(createUri(method, args), getRequestParams(method, args));
-        }
-
-        if (requestType.equals(RequestType.POST)){
-            return restRequest.post(createUri(method, args), getRequestParams(method, args));
-        }
-
-        if (requestType.equals(RequestType.DELETE)){
-            return restRequest.delete(createUri(method, args));
-        }
-
-        throw new IllegalStateException("trying to make a request without a known request type");
-    }
-
-
-    private RequestType determineRequestType(Method method){
-        if (method.isAnnotationPresent(GET.class)){
-            return RequestType.GET;
-        }
-
-        if (method.isAnnotationPresent(POST.class)){
-            return RequestType.POST;
-        }
-
-        if (method.isAnnotationPresent(PUT.class)){
-            return RequestType.POST;
-        }
-
-        if (method.isAnnotationPresent(DELETE.class)){
-            return RequestType.DELETE;
-        }
-           throw new IllegalArgumentException("missing Annotation for the request type, e.g. @GET");
-    }
 
     private String getClassIdentifier(){
         String identifier;
