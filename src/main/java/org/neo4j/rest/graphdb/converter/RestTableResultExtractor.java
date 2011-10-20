@@ -19,18 +19,22 @@
  */
 package org.neo4j.rest.graphdb.converter;
 
+import org.neo4j.rest.graphdb.RequestResult;
+import org.neo4j.rest.graphdb.util.JsonHelper;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class RestTableResultExtractor {
+public class RestTableResultExtractor implements RestResultConverter{
 
     private final RestEntityExtractor restEntityExtractor;
 
     public RestTableResultExtractor(RestEntityExtractor restEntityExtractor) {
         this.restEntityExtractor = restEntityExtractor;
     }
+
 
     public List<Map<String, Object>> extract(Map<?, ?> restResult) {
         List<String> columns = (List<String>) restResult.get("columns");
@@ -55,4 +59,23 @@ public class RestTableResultExtractor {
         }
         return newRow;
     }
+
+    @Override
+    public Object convertFromRepresentation(RequestResult value) {
+        return extract(toMap(value));
+    }
+
+    public boolean canHandle(Object restResult){
+        return restResult instanceof Map && ((Map)restResult).containsKey("columns") && ((Map)restResult).containsKey("data");
+    }
+
+    public Map<?, ?> toMap(RequestResult requestResult) {
+	   final String json = entityString(requestResult);
+	    return JsonHelper.jsonToMap(json);
+	}
+
+    public String entityString( RequestResult requestResult) {
+        return requestResult.getEntity();
+    }
+
 }
