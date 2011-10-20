@@ -43,9 +43,7 @@ public class ServiceInvocation implements RemoteInvocationStrategy{
     private RequestResult makeRequest(RequestType requestType, Method method, Object[] args){
         RestRequest restRequest = this.restAPI.getRestRequest();
         if (requestType.equals(RequestType.GET)){
-            System.out.println("trying to make get with uri "+ createUri(method, args));
-            return null;
-            //return restRequest.get(createUri(method, getRequestParams(method, args)));
+           return restRequest.get(createUri(method,args), getRequestParams(method, args));
         }
 
         if (requestType.equals(RequestType.PUT)){
