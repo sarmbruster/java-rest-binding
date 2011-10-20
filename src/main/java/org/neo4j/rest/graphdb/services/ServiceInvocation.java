@@ -144,7 +144,7 @@ public class ServiceInvocation implements RemoteInvocationStrategy{
 
         return newUri;
     }
-
+    //TODO consider @FormParam and @QueryParam
     private Map<String,Object> getRequestParams(Method method, Object[] args){
         Map<String,Object> requestParams = new HashMap<String, Object>(args.length);
         Class<?>[] paramTypes =  method.getParameterTypes();
