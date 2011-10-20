@@ -23,6 +23,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.helpers.collection.IterableWrapper;
+import org.neo4j.helpers.collection.IteratorUtil;
 import org.neo4j.rest.graphdb.RequestResult;
 import org.neo4j.rest.graphdb.RestAPI;
 import org.neo4j.rest.graphdb.converter.RestResultConverter;
@@ -48,19 +49,27 @@ public class RestPathParser implements RestResultConverter {
 
     public static Path parse(Map path, final RestAPI restApi) {
          TypeInformation typeInfo = new TypeInformation(path.get("nodes"));
-         if ( Map.class.isAssignableFrom(typeInfo.getGenericArguments()[0])){
-            return parseFullPath(path, restApi);
+        RestPathParser restPathParser = new RestPathParser(restApi);
+        if (restPathParser.isFullPath(typeInfo)){
+            return restPathParser.parseFullPath(path, restApi);
          }
-         if (typeInfo.getGenericArguments()[0].equals(String.class)){
-             return parsePath(path, restApi);
+         if (restPathParser.isPath(typeInfo)){
+             return restPathParser.parsePath(path, restApi);
          }
 
          throw new IllegalArgumentException("params map contained illegal type "+typeInfo.getGenericArguments()[0]);
     }
 
+    private  boolean isPath(TypeInformation typeInfo) {
+        return typeInfo.getGenericArguments()[0].equals(String.class);
+    }
+
+    private  boolean isFullPath(TypeInformation typeInfo) {
+        return Map.class.isAssignableFrom(typeInfo.getGenericArguments()[0]);
+    }
 
 
-    private static Path parseFullPath(Map path, final RestAPI restApi) {
+    private Path parseFullPath(Map path, final RestAPI restApi) {
         final Collection<Map<?, ?>> nodesData = (Collection<Map<?, ?>>) path.get("nodes");
         final Collection<Map<?, ?>> relationshipsData = (Collection<Map<?, ?>>) path.get("relationships");
         final Map<?, ?> lastRelationshipData = lastElement(relationshipsData);
@@ -87,7 +96,7 @@ public class RestPathParser implements RestResultConverter {
                 });
     }
 
-    private static Path parsePath(Map path, final RestAPI restApi){
+    private Path parsePath(Map path, final RestAPI restApi){
         final Collection<String> nodesData = (Collection<String>) path.get("nodes");
         final Collection<String> relationshipsData = (Collection<String>) path.get("relationships");
         final String lastRelationshipData = lastElement(relationshipsData);
@@ -113,17 +122,11 @@ public class RestPathParser implements RestResultConverter {
                 });
     }
 
-    private static String lastElement(Collection<String> collection){
-       if (collection.isEmpty()) return null;
-       if (collection instanceof List) {
-            List<String> list = (List<String>) collection;
-            return list.get(list.size()-1);
-       }
-
-       return null;
+    private String lastElement(Collection<String> collection){
+       return IteratorUtil.lastOrNull(collection);
     }
 
-    private static Map<?, ?> lastElement(Collection<Map<?, ?>> collection) {
+    private Map<?, ?> lastElement(Collection<Map<?, ?>> collection) {
         if (collection.isEmpty()) return null;
         if (collection instanceof List) {
             List<Map<?,?>> list = (List<Map<?,?>>) collection;
