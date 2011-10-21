@@ -19,19 +19,33 @@
  */
 package org.neo4j.kernel;
 
+import java.util.Collections;
+import java.util.Map;
+
+import javax.transaction.HeuristicMixedException;
+import javax.transaction.HeuristicRollbackException;
+import javax.transaction.InvalidTransactionException;
+import javax.transaction.NotSupportedException;
+import javax.transaction.RollbackException;
+import javax.transaction.Status;
+import javax.transaction.Synchronization;
+import javax.transaction.SystemException;
+import javax.transaction.Transaction;
+import javax.transaction.TransactionManager;
+import javax.transaction.xa.XAResource;
+
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.kernel.impl.core.*;
+import org.neo4j.kernel.impl.core.KernelPanicEventGenerator;
+import org.neo4j.kernel.impl.core.LastCommittedTxIdSetter;
+import org.neo4j.kernel.impl.core.LockReleaser;
+import org.neo4j.kernel.impl.core.RelationshipTypeCreator;
+import org.neo4j.kernel.impl.core.TxEventSyncHookFactory;
 import org.neo4j.kernel.impl.nioneo.store.FileSystemAbstraction;
 import org.neo4j.kernel.impl.nioneo.store.StoreId;
 import org.neo4j.kernel.impl.transaction.LockManager;
 import org.neo4j.kernel.impl.transaction.TxModule;
 import org.neo4j.kernel.impl.transaction.xaframework.TxIdGenerator;
 import org.neo4j.rest.graphdb.RestGraphDatabase;
-
-import javax.transaction.*;
-import javax.transaction.xa.XAResource;
-import java.util.Collections;
-import java.util.Map;
 
 /**
 * @author mh

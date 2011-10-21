@@ -19,19 +19,32 @@
  */
 package org.neo4j.rest.graphdb.traversal;
 
-import org.neo4j.graphdb.*;
-import org.neo4j.graphdb.traversal.*;
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ws.rs.core.Response;
+
+import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Path;
+import org.neo4j.graphdb.RelationshipExpander;
+import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.traversal.BranchOrderingPolicy;
+import org.neo4j.graphdb.traversal.Evaluator;
+import org.neo4j.graphdb.traversal.PruneEvaluator;
 import org.neo4j.graphdb.traversal.Traverser;
+import org.neo4j.graphdb.traversal.UniquenessFactory;
 import org.neo4j.helpers.Predicate;
 import org.neo4j.kernel.Traversal;
 import org.neo4j.kernel.Uniqueness;
 import org.neo4j.rest.graphdb.RequestResult;
 import org.neo4j.rest.graphdb.RestRequest;
 import org.neo4j.rest.graphdb.entity.RestNode;
-
-import javax.ws.rs.core.Response;
-import java.lang.reflect.Field;
-import java.util.*;
 
 /**
  * @author Michael Hunger

@@ -12,7 +12,7 @@
     <packaging>jar</packaging>
     <version>1.5-SNAPSHOT</version>
     <name>Neo4j - Rest GraphDatabaseService Wrapper</name>
-    <description>Neo4j REST binding implementing the GraphDatabaseService interface.</description>&gt;
+    <description>Neo4j REST binding implementing the GraphDatabaseService interface.</description>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <slf4j.version>1.6.1</slf4j.version>

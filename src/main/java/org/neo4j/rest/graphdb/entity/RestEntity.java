@@ -20,22 +20,19 @@
 package org.neo4j.rest.graphdb.entity;
 
 
+import java.net.URI;
+import java.util.Collection;
+import java.util.Map;
+
 import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.helpers.collection.IterableWrapper;
 import org.neo4j.rest.graphdb.PropertiesMap;
-import org.neo4j.rest.graphdb.RequestResult;
 import org.neo4j.rest.graphdb.RestAPI;
 import org.neo4j.rest.graphdb.RestGraphDatabase;
 import org.neo4j.rest.graphdb.RestRequest;
 import org.neo4j.rest.graphdb.UpdatableRestResult;
 import org.neo4j.rest.graphdb.util.ArrayConverter;
-
-import javax.ws.rs.core.Response.Status;
-import java.net.URI;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
 
 public class RestEntity implements PropertyContainer, UpdatableRestResult<RestEntity> {
     private Map<?, ?> structuralData;

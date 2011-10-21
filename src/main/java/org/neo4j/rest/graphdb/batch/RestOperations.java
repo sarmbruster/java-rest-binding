@@ -19,16 +19,17 @@
  */
 package org.neo4j.rest.graphdb.batch;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+
+import javax.ws.rs.core.MediaType;
+
 import org.neo4j.rest.graphdb.RequestResult;
 import org.neo4j.rest.graphdb.RestAPI;
 import org.neo4j.rest.graphdb.UpdatableRestResult;
 import org.neo4j.rest.graphdb.batch.RestOperations.RestOperation.Methods;
 import org.neo4j.rest.graphdb.converter.RestResultConverter;
-
-import javax.ws.rs.core.MediaType;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class RestOperations {
     private AtomicLong currentBatchId = new AtomicLong(0);

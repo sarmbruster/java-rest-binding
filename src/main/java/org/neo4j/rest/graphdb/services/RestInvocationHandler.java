@@ -19,16 +19,15 @@
  */
 package org.neo4j.rest.graphdb.services;
 
-import org.neo4j.rest.graphdb.RequestResult;
-import org.neo4j.rest.graphdb.RestAPI;
-import org.neo4j.rest.graphdb.RestResultException;
-import org.neo4j.rest.graphdb.converter.ResultTypeConverter;
-import org.neo4j.rest.graphdb.converter.TypeInformation;
-import org.neo4j.rest.graphdb.util.JsonHelper;
-
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+
+import org.neo4j.rest.graphdb.RequestResult;
+import org.neo4j.rest.graphdb.RestAPI;
+import org.neo4j.rest.graphdb.converter.ResultTypeConverter;
+import org.neo4j.rest.graphdb.converter.TypeInformation;
+import org.neo4j.rest.graphdb.util.JsonHelper;
 
 /**
  * User: KBurchardi

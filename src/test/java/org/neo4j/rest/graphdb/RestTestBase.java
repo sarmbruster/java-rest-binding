@@ -20,6 +20,9 @@
 package org.neo4j.rest.graphdb;
 
 
+import java.net.URISyntaxException;
+import java.util.Iterator;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -28,9 +31,6 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
-
-import java.net.URISyntaxException;
-import java.util.Iterator;
 
 public class RestTestBase {
 

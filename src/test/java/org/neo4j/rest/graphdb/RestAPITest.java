@@ -32,6 +32,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexManager;
+import org.neo4j.index.impl.lucene.LuceneIndexImplementation;
 import org.neo4j.rest.graphdb.index.RestIndexManager;
 import org.neo4j.rest.graphdb.util.TestHelper;
 
@@ -91,7 +92,7 @@ public class RestAPITest extends RestTestBase {
 	
 	@Test
 	public void testCreateRestAPIIndexForNodes(){		
-		this.restAPI.createIndex(Node.class, "indexName", true);
+		this.restAPI.createIndex(Node.class, "indexName", LuceneIndexImplementation.FULLTEXT_CONFIG);
 		RestIndexManager index = (RestIndexManager) getRestGraphDb().index();
   	    assertTrue(index.existsForNodes("indexName"));
 	}
@@ -99,20 +100,20 @@ public class RestAPITest extends RestTestBase {
 	
 	@Test 
 	public void testForDoubleCreatedIndexForNodesWithSameParams() {
-		this.restAPI.createIndex(Node.class, "indexName", true);		
-		this.restAPI.createIndex(Node.class, "indexName", true);
+		this.restAPI.createIndex(Node.class, "indexName", LuceneIndexImplementation.FULLTEXT_CONFIG);		
+		this.restAPI.createIndex(Node.class, "indexName", LuceneIndexImplementation.FULLTEXT_CONFIG);
 	}
 	
 	@Test 
 	public void testForDoubleCreatedIndexForNodesWithSameParamsWithoutFullText() {
-		this.restAPI.createIndex(Node.class, "indexName", false);		
+		this.restAPI.createIndex(Node.class, "indexName", LuceneIndexImplementation.EXACT_CONFIG);		
 		RestIndexManager index = (RestIndexManager) getRestGraphDb().index();
    	    Index<Node> testIndex = index.forNodes("indexName");   		
 	}
 	
 	@Test (expected = IllegalArgumentException.class)
 	public void testForDoubleCreatedIndexForNodesWithEmptyParams() {
-		this.restAPI.createIndex(Node.class, "indexName", true);
+		this.restAPI.createIndex(Node.class, "indexName", LuceneIndexImplementation.FULLTEXT_CONFIG);
 		RestIndexManager index = (RestIndexManager) getRestGraphDb().index();
    	    Index<Node> testIndex = index.forNodes("indexName", new HashMap<String, String>());   		
 	}
@@ -121,18 +122,18 @@ public class RestAPITest extends RestTestBase {
 	public void testForDoubleCreatedIndexForNodesWithEmptyParamsReversed() {
 		RestIndexManager index = (RestIndexManager) getRestGraphDb().index();
    	    Index<Node> testIndex = index.forNodes("indexName", new HashMap<String, String>());   
-		this.restAPI.createIndex(Node.class, "indexName", true);   		
+		this.restAPI.createIndex(Node.class, "indexName", LuceneIndexImplementation.FULLTEXT_CONFIG);   		
 	}
 	
 	@Test (expected = IllegalArgumentException.class)
 	public void testForDoubleCreatedIndexForNodesWithDifferentParamsViaREST() {
-		this.restAPI.createIndex(Node.class, "indexName", true);		
-		this.restAPI.createIndex(Node.class, "indexName", false);
+		this.restAPI.createIndex(Node.class, "indexName", LuceneIndexImplementation.FULLTEXT_CONFIG);		
+		this.restAPI.createIndex(Node.class, "indexName", LuceneIndexImplementation.EXACT_CONFIG);
 	}
 	
 	@Test (expected = IllegalArgumentException.class)
 	public void testForDoubleCreatedIndexForNodesWithDifferentParams() {
-		this.restAPI.createIndex(Node.class, "indexName", true);
+		this.restAPI.createIndex(Node.class, "indexName", LuceneIndexImplementation.FULLTEXT_CONFIG);
 		HashMap<String, String> config = new HashMap<String, String>();
 		config.put("test", "value");
 		RestIndexManager index = (RestIndexManager) getRestGraphDb().index();
@@ -145,7 +146,7 @@ public class RestAPITest extends RestTestBase {
 		config.put("test", "value");
 		RestIndexManager index = (RestIndexManager) getRestGraphDb().index();
    	    Index<Node> testIndex = index.forNodes("indexName", config);  
-   	    this.restAPI.createIndex(Node.class, "indexName", true);
+   	    this.restAPI.createIndex(Node.class, "indexName", LuceneIndexImplementation.FULLTEXT_CONFIG);
 	}
 	
 	@Test
@@ -162,7 +163,7 @@ public class RestAPITest extends RestTestBase {
 	    Map<String, Object> props = new HashMap<String, Object>();
 		props.put("name", "test");
 	    Relationship rel = this.restAPI.createRelationship(refNode, node, Type.TEST, props );
-		this.restAPI.createIndex(Relationship.class, "indexName", true);
+		this.restAPI.createIndex(Relationship.class, "indexName", LuceneIndexImplementation.FULLTEXT_CONFIG);
 		IndexManager index = getRestGraphDb().index();
   	    assertTrue(index.existsForRelationships("indexName"));
 	}
@@ -183,7 +184,7 @@ public class RestAPITest extends RestTestBase {
 	
 	@Test
 	public void testCreateRestAPIIndexForRelationships(){		
-		this.restAPI.createIndex(Relationship.class, "indexName", true);
+		this.restAPI.createIndex(Relationship.class, "indexName", LuceneIndexImplementation.FULLTEXT_CONFIG);
 		RestIndexManager index = (RestIndexManager) getRestGraphDb().index();
   	    assertTrue(index.existsForRelationships("indexName"));
 	}
@@ -191,20 +192,20 @@ public class RestAPITest extends RestTestBase {
 	
 	@Test 
 	public void testForDoubleCreatedIndexForRelationshipsWithSameParams() {
-		this.restAPI.createIndex(Relationship.class, "indexName", true);		
-		this.restAPI.createIndex(Relationship.class, "indexName", true);
+		this.restAPI.createIndex(Relationship.class, "indexName", LuceneIndexImplementation.FULLTEXT_CONFIG);		
+		this.restAPI.createIndex(Relationship.class, "indexName", LuceneIndexImplementation.FULLTEXT_CONFIG);
 	}
 	
 	@Test 
 	public void testForDoubleCreatedIndexForRelationshipsWithSameParamsWithoutFullText() {
-		this.restAPI.createIndex(Relationship.class, "indexName", false);		
+		this.restAPI.createIndex(Relationship.class, "indexName", LuceneIndexImplementation.EXACT_CONFIG);		
 		RestIndexManager index = (RestIndexManager) getRestGraphDb().index();
    	    Index<Relationship> testIndex = index.forRelationships("indexName");   		
 	}
 	
 	@Test (expected = IllegalArgumentException.class)
 	public void testForDoubleCreatedIndexForRelationshipsWithEmptyParams() {
-		this.restAPI.createIndex(Relationship.class, "indexName", true);
+		this.restAPI.createIndex(Relationship.class, "indexName", LuceneIndexImplementation.FULLTEXT_CONFIG);
 		RestIndexManager index = (RestIndexManager) getRestGraphDb().index();
    	    Index<Relationship> testIndex = index.forRelationships("indexName", new HashMap<String, String>());   		
 	}
@@ -213,18 +214,18 @@ public class RestAPITest extends RestTestBase {
 	public void testForDoubleCreatedIndexForRelationshipsWithEmptyParamsReversed() {
 		RestIndexManager index = (RestIndexManager) getRestGraphDb().index();
    	    Index<Relationship> testIndex = index.forRelationships("indexName", new HashMap<String, String>());   
-		this.restAPI.createIndex(Relationship.class, "indexName", true);   		
+		this.restAPI.createIndex(Relationship.class, "indexName", LuceneIndexImplementation.FULLTEXT_CONFIG);   		
 	}
 	
 	@Test (expected = IllegalArgumentException.class)
 	public void testForDoubleCreatedIndexForRelationshipsWithDifferentParamsViaREST() {
-		this.restAPI.createIndex(Relationship.class, "indexName", true);		
-		this.restAPI.createIndex(Relationship.class, "indexName", false);
+		this.restAPI.createIndex(Relationship.class, "indexName", LuceneIndexImplementation.FULLTEXT_CONFIG);		
+		this.restAPI.createIndex(Relationship.class, "indexName", LuceneIndexImplementation.EXACT_CONFIG);
 	}
 	
 	@Test (expected = IllegalArgumentException.class)
 	public void testForDoubleCreatedIndexForRelationshipsWithDifferentParams() {
-		this.restAPI.createIndex(Relationship.class, "indexName", true);
+		this.restAPI.createIndex(Relationship.class, "indexName", LuceneIndexImplementation.FULLTEXT_CONFIG);
 		HashMap<String, String> config = new HashMap<String, String>();
 		config.put("test", "value");
 		RestIndexManager index = (RestIndexManager) getRestGraphDb().index();
@@ -237,7 +238,7 @@ public class RestAPITest extends RestTestBase {
 		config.put("test", "value");
 		RestIndexManager index = (RestIndexManager) getRestGraphDb().index();
    	    Index<Relationship> testIndex = index.forRelationships("indexName", config);  
-   	    this.restAPI.createIndex(Relationship.class, "indexName", true);
+   	    this.restAPI.createIndex(Relationship.class, "indexName", LuceneIndexImplementation.FULLTEXT_CONFIG);
 	}
 	
 	@Test
@@ -249,8 +250,8 @@ public class RestAPITest extends RestTestBase {
 	
 	@Test
 	public void testCreateIndexWithSameNameButDifferentType(){
-		this.restAPI.createIndex(Relationship.class, "indexName", true);
-		this.restAPI.createIndex(Node.class, "indexName", true);
+		this.restAPI.createIndex(Relationship.class, "indexName", LuceneIndexImplementation.FULLTEXT_CONFIG);
+		this.restAPI.createIndex(Node.class, "indexName", LuceneIndexImplementation.FULLTEXT_CONFIG);
 		RestIndexManager index = (RestIndexManager) getRestGraphDb().index();
 		assertTrue(index.existsForNodes("indexName"));
 		assertTrue(index.existsForRelationships("indexName"));

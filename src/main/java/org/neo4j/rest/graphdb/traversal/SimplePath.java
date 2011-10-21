@@ -19,12 +19,12 @@
  */
 package org.neo4j.rest.graphdb.traversal;
 
+import java.util.Iterator;
+
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
-
-import java.util.Iterator;
 
 /**
  * @author Michael Hunger

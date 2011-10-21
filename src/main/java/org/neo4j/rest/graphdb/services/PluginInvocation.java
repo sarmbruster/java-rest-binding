@@ -19,16 +19,17 @@
  */
 package org.neo4j.rest.graphdb.services;
 
-import org.neo4j.rest.graphdb.RequestResult;
-import org.neo4j.rest.graphdb.RestAPI;
-import org.neo4j.rest.graphdb.RestRequest;
-import org.neo4j.server.plugins.Name;
-
-import javax.ws.rs.PathParam;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.ws.rs.PathParam;
+
+import org.neo4j.rest.graphdb.RequestResult;
+import org.neo4j.rest.graphdb.RestAPI;
+import org.neo4j.rest.graphdb.RestRequest;
+import org.neo4j.server.plugins.Name;
 
 /**
  * User: KBurchardi

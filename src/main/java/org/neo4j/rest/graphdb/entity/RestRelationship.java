@@ -19,11 +19,15 @@
  */
 package org.neo4j.rest.graphdb.entity;
 
-import org.neo4j.graphdb.*;
-import org.neo4j.rest.graphdb.RestAPI;
-
 import java.net.URI;
 import java.util.Map;
+
+import org.neo4j.graphdb.DynamicRelationshipType;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.NotFoundException;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.rest.graphdb.RestAPI;
 
 
 public class RestRelationship extends RestEntity implements Relationship {

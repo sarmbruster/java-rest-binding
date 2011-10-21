@@ -19,6 +19,10 @@
  */
 package org.neo4j.rest.graphdb;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.neo4j.helpers.collection.MapUtil.map;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,12 +34,7 @@ import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.rest.graphdb.batch.BatchCallback;
 import org.neo4j.rest.graphdb.entity.RestRelationship;
-import org.neo4j.rest.graphdb.index.RestIndex;
 import org.neo4j.rest.graphdb.util.TestHelper;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.neo4j.helpers.collection.MapUtil.map;
 
 public class BatchRestAPITest extends RestTestBase {
     private RestAPI restAPI;

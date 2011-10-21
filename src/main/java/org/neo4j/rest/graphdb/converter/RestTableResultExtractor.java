@@ -19,13 +19,13 @@
  */
 package org.neo4j.rest.graphdb.converter;
 
-import org.neo4j.rest.graphdb.RequestResult;
-import org.neo4j.rest.graphdb.util.JsonHelper;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.neo4j.rest.graphdb.RequestResult;
+import org.neo4j.rest.graphdb.util.JsonHelper;
 
 public class RestTableResultExtractor implements RestResultConverter{
 

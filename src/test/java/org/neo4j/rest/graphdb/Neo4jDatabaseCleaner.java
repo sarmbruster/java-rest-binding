@@ -19,12 +19,16 @@
  */
 package org.neo4j.rest.graphdb;
 
-import org.neo4j.graphdb.*;
-import org.neo4j.graphdb.index.IndexManager;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.index.IndexManager;
 
 /**
  * @author mh

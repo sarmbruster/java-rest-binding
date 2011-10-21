@@ -19,7 +19,8 @@
  */
 package org.neo4j.rest.graphdb;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.neo4j.graphdb.Direction.INCOMING;
 import static org.neo4j.graphdb.Direction.OUTGOING;
 import static org.neo4j.rest.graphdb.RelationshipHasMatcher.match;

@@ -21,8 +21,10 @@ package org.neo4j.rest.graphdb;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.Collection;
+
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;

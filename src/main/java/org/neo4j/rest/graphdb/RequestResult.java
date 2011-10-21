@@ -19,15 +19,16 @@
  */
 package org.neo4j.rest.graphdb;
 
-import com.sun.jersey.api.client.ClientResponse;
+import java.net.URI;
+import java.util.Map;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.StatusType;
 
 import org.neo4j.rest.graphdb.batch.RestOperations.RestOperation;
 import org.neo4j.rest.graphdb.util.JsonHelper;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.StatusType;
-import java.net.URI;
-import java.util.Map;
+import com.sun.jersey.api.client.ClientResponse;
 
 
 /**

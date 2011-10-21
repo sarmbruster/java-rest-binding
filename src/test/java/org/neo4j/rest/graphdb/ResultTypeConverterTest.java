@@ -19,6 +19,19 @@
  */
 package org.neo4j.rest.graphdb;
 
+import static java.util.Arrays.asList;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.graphdb.Node;
@@ -30,11 +43,6 @@ import org.neo4j.rest.graphdb.converter.TypeInformation;
 import org.neo4j.rest.graphdb.entity.RestNode;
 import org.neo4j.rest.graphdb.entity.RestRelationship;
 import org.neo4j.rest.graphdb.traversal.SimplePath;
-
-import java.util.*;
-
-import static java.util.Arrays.asList;
-import static junit.framework.Assert.*;
 
 /**
  * User: KBurchardi

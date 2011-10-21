@@ -19,18 +19,24 @@
  */
 package org.neo4j.rest.graphdb.entity;
 
-import org.neo4j.graphdb.*;
+import static java.util.Arrays.asList;
+
+import java.net.URI;
+import java.util.Map;
+
+import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.ReturnableEvaluator;
+import org.neo4j.graphdb.StopEvaluator;
+import org.neo4j.graphdb.Traverser;
 import org.neo4j.graphdb.Traverser.Order;
 import org.neo4j.helpers.collection.CombiningIterable;
 import org.neo4j.helpers.collection.IterableWrapper;
 import org.neo4j.helpers.collection.IteratorUtil;
 import org.neo4j.rest.graphdb.RestAPI;
 import org.neo4j.rest.graphdb.traversal.RestDirection;
-
-import java.net.URI;
-import java.util.Map;
-
-import static java.util.Arrays.asList;
 
 public class RestNode extends RestEntity implements Node {
     public RestNode( URI uri, RestAPI restApi ) {

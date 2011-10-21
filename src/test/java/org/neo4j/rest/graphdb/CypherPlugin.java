@@ -19,10 +19,11 @@
  */
 package org.neo4j.rest.graphdb;
 
-import org.neo4j.server.plugins.Name;
+import java.util.Map;
 
 import javax.ws.rs.PathParam;
-import java.util.Map;
+
+import org.neo4j.server.plugins.Name;
 
 /**
  * User: KBurchardi

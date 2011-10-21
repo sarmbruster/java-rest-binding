@@ -19,17 +19,17 @@
  */
 package org.neo4j.rest.graphdb;
 
-import org.junit.Test;
-import org.neo4j.graphdb.Node;
-import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.rest.graphdb.converter.TypeInformation;
+import static java.util.Arrays.asList;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 
 import java.util.Collection;
 import java.util.Map;
 
-import static java.util.Arrays.asList;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
+import org.junit.Test;
+import org.neo4j.graphdb.Node;
+import org.neo4j.helpers.collection.MapUtil;
+import org.neo4j.rest.graphdb.converter.TypeInformation;
 
 /**
  * User: KBurchardi

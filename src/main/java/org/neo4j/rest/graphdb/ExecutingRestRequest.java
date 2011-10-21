@@ -19,25 +19,22 @@
  */
 package org.neo4j.rest.graphdb;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import javax.ws.rs.core.MediaType;
+
+import org.neo4j.rest.graphdb.util.JsonHelper;
+
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
-
-import javax.ws.rs.core.MediaType;
-
-import org.neo4j.rest.graphdb.RequestResult;
-import org.neo4j.rest.graphdb.util.JsonHelper;
-
-
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
-
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 public class ExecutingRestRequest implements RestRequest {
 

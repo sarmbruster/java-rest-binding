@@ -19,12 +19,12 @@
  */
 package org.neo4j.rest.graphdb;
 
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.kernel.EmbeddedGraphDatabase;
-
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.kernel.EmbeddedGraphDatabase;
 
 /**
  * @author mh

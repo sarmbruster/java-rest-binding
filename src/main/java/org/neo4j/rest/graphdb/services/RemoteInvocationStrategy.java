@@ -19,9 +19,9 @@
  */
 package org.neo4j.rest.graphdb.services;
 
-import org.neo4j.rest.graphdb.RequestResult;
-
 import java.lang.reflect.Method;
+
+import org.neo4j.rest.graphdb.RequestResult;
 
 /**
  * User: KBurchardi

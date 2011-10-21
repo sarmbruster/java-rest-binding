@@ -20,10 +20,10 @@
 package org.neo4j.rest.graphdb;
 
 
-import org.neo4j.graphdb.Node;
-
 import java.util.Collection;
 import java.util.Map;
+
+import org.neo4j.graphdb.Node;
 
 /**
  * User: KBurchardi

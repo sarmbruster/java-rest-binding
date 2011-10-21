@@ -19,11 +19,15 @@
  */
 package org.neo4j.rest.graphdb.converter;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.neo4j.rest.graphdb.RestAPI;
 import org.neo4j.rest.graphdb.RestResultException;
 import org.neo4j.rest.graphdb.traversal.RestPathParser;
-
-import java.util.*;
 
 /**
  * User: KBurchardi

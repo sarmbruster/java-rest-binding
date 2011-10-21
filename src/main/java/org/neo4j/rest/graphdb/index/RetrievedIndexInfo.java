@@ -19,12 +19,13 @@
  */
 package org.neo4j.rest.graphdb.index;
 
-import com.sun.jersey.api.client.ClientResponse;
-import org.neo4j.rest.graphdb.RequestResult;
-
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+
+import org.neo4j.rest.graphdb.RequestResult;
+
+import com.sun.jersey.api.client.ClientResponse;
 
 /**
  * @author mh

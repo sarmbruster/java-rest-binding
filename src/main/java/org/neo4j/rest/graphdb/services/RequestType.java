@@ -19,15 +19,16 @@
  */
 package org.neo4j.rest.graphdb.services;
 
-import org.neo4j.rest.graphdb.RequestResult;
-import org.neo4j.rest.graphdb.RestRequest;
+import java.lang.reflect.Method;
+import java.util.Map;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
-import java.lang.reflect.Method;
-import java.util.Map;
+
+import org.neo4j.rest.graphdb.RequestResult;
+import org.neo4j.rest.graphdb.RestRequest;
 
 /**
 * User: KBurchardi

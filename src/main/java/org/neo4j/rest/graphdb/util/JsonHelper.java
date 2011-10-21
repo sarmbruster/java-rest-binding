@@ -24,15 +24,15 @@ package org.neo4j.rest.graphdb.util;
  * @since 13.12.10
  */
 
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.neo4j.rest.graphdb.PropertiesMap;
-
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.neo4j.rest.graphdb.PropertiesMap;
 
 public class JsonHelper {
 

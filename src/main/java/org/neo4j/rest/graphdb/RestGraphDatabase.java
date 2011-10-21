@@ -20,12 +20,13 @@
 package org.neo4j.rest.graphdb;
 
 
-import org.neo4j.graphdb.*;
+import java.util.Collection;
+
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
 import org.neo4j.kernel.Config;
 import org.neo4j.kernel.RestConfig;
 import org.neo4j.rest.graphdb.index.RestIndexManager;
-import java.net.URI;
-import java.util.Collection;
 
 
 public class RestGraphDatabase extends AbstractRemoteDatabase {   

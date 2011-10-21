@@ -19,12 +19,24 @@
  */
 package org.neo4j.rest.graphdb;
 
-import org.neo4j.graphdb.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.NotFoundException;
+import org.neo4j.graphdb.PropertyContainer;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.index.impl.lucene.LuceneIndexImplementation;
 import org.neo4j.index.lucene.ValueContext;
 import org.neo4j.rest.graphdb.batch.BatchCallback;
 import org.neo4j.rest.graphdb.batch.BatchRestAPI;
@@ -36,16 +48,16 @@ import org.neo4j.rest.graphdb.converter.RestIndexHitsConverter;
 import org.neo4j.rest.graphdb.entity.RestEntity;
 import org.neo4j.rest.graphdb.entity.RestNode;
 import org.neo4j.rest.graphdb.entity.RestRelationship;
-import org.neo4j.rest.graphdb.index.*;
+import org.neo4j.rest.graphdb.index.IndexInfo;
+import org.neo4j.rest.graphdb.index.RestIndex;
+import org.neo4j.rest.graphdb.index.RestIndexManager;
+import org.neo4j.rest.graphdb.index.RetrievedIndexInfo;
+import org.neo4j.rest.graphdb.index.SimpleIndexHits;
 import org.neo4j.rest.graphdb.services.PluginInvocation;
 import org.neo4j.rest.graphdb.services.RestInvocationHandler;
 import org.neo4j.rest.graphdb.services.ServiceInvocation;
 import org.neo4j.rest.graphdb.traversal.RestTraversal;
 import org.neo4j.rest.graphdb.util.JsonHelper;
-
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import java.util.*;
 
 
 public class RestAPI {
@@ -132,8 +144,7 @@ public class RestAPI {
         throw new IllegalArgumentException("Index " + indexName + " does not yet exist");
     }
 
-    public <T extends PropertyContainer> Index<T> createIndex(Class<T> type, String indexName, boolean fullText) {
-        Map<String, String> config = fullText ? LuceneIndexImplementation.FULLTEXT_CONFIG : LuceneIndexImplementation.EXACT_CONFIG;
+    public <T extends PropertyContainer> Index<T> createIndex(Class<T> type, String indexName, Map<String, String> config) {
         if (Node.class.isAssignableFrom(type)) {
             return (Index<T>) this.index().forNodes(indexName, config);
         }

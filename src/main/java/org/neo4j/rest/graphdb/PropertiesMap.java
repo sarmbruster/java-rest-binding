@@ -24,10 +24,15 @@ package org.neo4j.rest.graphdb;
  * @since 13.12.10
  */
 
-import org.neo4j.graphdb.PropertyContainer;
-
 import java.lang.reflect.Array;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import org.neo4j.graphdb.PropertyContainer;
 
 public class PropertiesMap {
 

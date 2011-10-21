@@ -19,6 +19,10 @@
  */
 package org.neo4j.rest.graphdb.traversal;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
@@ -30,10 +34,6 @@ import org.neo4j.rest.graphdb.converter.RestResultConverter;
 import org.neo4j.rest.graphdb.converter.TypeInformation;
 import org.neo4j.rest.graphdb.entity.RestNode;
 import org.neo4j.rest.graphdb.entity.RestRelationship;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Michael Hunger
