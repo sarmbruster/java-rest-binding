@@ -19,9 +19,7 @@
  */
 package org.neo4j.rest.graphdb;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
 
 /**
  * User: KBurchardi
@@ -32,5 +30,14 @@ import javax.ws.rs.PathParam;
 public interface HelloWorldService {
     @GET
     @Path( "/{nodeId}" )
-    public String hello( @PathParam( "nodeId" ) long nodeId );
+    public String get(@PathParam("nodeId") long nodeId);
+    @PUT
+    @Path( "/{nodeId}" )
+    public String put(@PathParam("nodeId") long nodeId, String body);
+    @POST
+    @Path( "/{nodeId}" )
+    public String post(@PathParam("nodeId") long nodeId, String body);
+    @DELETE
+    @Path( "/{nodeId}" )
+    public String delete(@PathParam("nodeId") long nodeId);
 }

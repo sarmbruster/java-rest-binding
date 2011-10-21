@@ -20,9 +20,8 @@
 
 package org.neo4j.rest.graphdb.extension;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -31,7 +30,26 @@ public class HelloWorldResource {
 
     @GET
     @Path("/{nodeId}")
-    public Response hello(@PathParam("nodeId") long nodeId) {
-        return Response.status(Status.OK).entity(("\"Hello World, nodeId=" + nodeId+"\"").getBytes()).build();
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response get(@PathParam("nodeId") long nodeId) {
+        return Response.status(Status.OK).entity(("\"get " + nodeId + "\"").getBytes()).build();
+    }
+    @PUT
+    @Path("/{nodeId}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response put(@PathParam("nodeId") long nodeId, String body) {
+        return Response.status(Status.OK).entity(("\"put " + nodeId +":"+body +"\"").getBytes()).build();
+    }
+    @POST
+    @Path("/{nodeId}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response post(@PathParam("nodeId") long nodeId, String body) {
+        return Response.status(Status.OK).entity(("\"post " + nodeId +":"+body + "\"").getBytes()).build();
+    }
+    @DELETE
+    @Path("/{nodeId}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response delete(@PathParam("nodeId") long nodeId) {
+        return Response.status(Status.OK).entity(("\"delete " + nodeId + "\"").getBytes()).build();
     }
 }

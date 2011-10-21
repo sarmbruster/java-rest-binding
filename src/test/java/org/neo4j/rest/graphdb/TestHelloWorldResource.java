@@ -40,6 +40,9 @@ public class TestHelloWorldResource extends RestTestBase {
     @Test
     public void testHelloWorldService() throws Exception {
         HelloWorldService hws = this.restAPI.getService(HelloWorldService.class, SERVER_ROOT+"/test");
-        assertEquals("Hello World, nodeId=0", hws.hello(0));
+        assertEquals("get 0", hws.get(0));
+        //assertEquals("put 0:post", hws.put(0, "put"));
+        //assertEquals("post 0:post", hws.post(0, "post"));
+        assertEquals("delete 0", hws.delete(0));
     }
 }
