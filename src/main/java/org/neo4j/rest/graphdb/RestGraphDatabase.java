@@ -20,13 +20,14 @@
 package org.neo4j.rest.graphdb;
 
 
-import java.util.Collection;
-
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.kernel.Config;
+import org.neo4j.kernel.KernelData;
 import org.neo4j.kernel.RestConfig;
 import org.neo4j.rest.graphdb.index.RestIndexManager;
+
+import java.util.Collection;
 
 
 public class RestGraphDatabase extends AbstractRemoteDatabase {   
@@ -34,19 +35,20 @@ public class RestGraphDatabase extends AbstractRemoteDatabase {
 
     
     public RestGraphDatabase( RestAPI api){
+        super(api.getStoreDir());
     	this.restAPI = api;    	
     }
     
-    public RestGraphDatabase( String uri ) {     
+    public RestGraphDatabase( String uri ) {
         this( new ExecutingRestRequest( uri ));
     }
 
-    public RestGraphDatabase( String uri, String user, String password ) {        
+    public RestGraphDatabase( String uri, String user, String password ) {
         this(new ExecutingRestRequest( uri, user, password ));
     }
     
     public RestGraphDatabase( RestRequest restRequest){
-    	this(new RestAPI(restRequest)); 	
+    	this(new RestAPI(restRequest));
     } 
     
     
@@ -83,23 +85,10 @@ public class RestGraphDatabase extends AbstractRemoteDatabase {
     public long getPropertyRefetchTimeInMillis() {
         return this.restAPI.getPropertyRefetchTimeInMillis();
 	}
-    @Override
-    public String getStoreDir() {
-        return this.restAPI.getStoreDir();
-    }
 
     @Override
     public Config getConfig() {
         return new RestConfig(this);
     }
 
-    @Override
-    public <T> Collection<T> getManagementBeans(Class<T> tClass) {
-        return null;
-    }
-
-    @Override
-    public boolean isReadOnly() {
-        return false;
-    }
 }

@@ -19,15 +19,16 @@
  */
 package org.neo4j.rest.graphdb;
 
-import java.io.Serializable;
-import java.util.Map;
-
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.*;
 import org.neo4j.graphdb.event.KernelEventHandler;
 import org.neo4j.graphdb.event.TransactionEventHandler;
 import org.neo4j.kernel.AbstractGraphDatabase;
+import org.neo4j.kernel.KernelData;
+import org.neo4j.kernel.TransactionBuilder;
+
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Map;
 
 abstract class AbstractRemoteDatabase extends AbstractGraphDatabase {
     public Transaction beginTx() {
@@ -41,7 +42,26 @@ abstract class AbstractRemoteDatabase extends AbstractGraphDatabase {
 
             public void failure() {
             }
+
+            @Override
+            public Lock acquireWriteLock(PropertyContainer propertyContainer) {
+                return null;
+            }
+
+            @Override
+            public Lock acquireReadLock(PropertyContainer propertyContainer) {
+                return null;
+            }
         };
+    }
+
+    @Override
+    public TransactionBuilder tx() {
+        return null;
+    }
+
+    protected AbstractRemoteDatabase(String storeDir) {
+        super(storeDir);
     }
 
     public <T> TransactionEventHandler<T> registerTransactionEventHandler( TransactionEventHandler<T> tTransactionEventHandler ) {
@@ -76,8 +96,17 @@ abstract class AbstractRemoteDatabase extends AbstractGraphDatabase {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    protected void close() {
 
-    public void shutdown() {
     }
-    
+    @Override
+    public <T> Collection<T> getManagementBeans(Class<T> tClass) {
+        return null;
+    }
+
+    @Override
+    public KernelData getKernelData() {
+        return null;
+    }
 }

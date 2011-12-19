@@ -19,11 +19,6 @@
  */
 package org.neo4j.rest.graphdb;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -42,6 +37,9 @@ import org.neo4j.kernel.Traversal;
 import org.neo4j.rest.graphdb.MatrixDataGraph.RelTypes;
 import org.neo4j.test.ImpermanentGraphDatabase;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 
 
 /**
@@ -52,17 +50,13 @@ import org.neo4j.test.ImpermanentGraphDatabase;
 public class MatrixDatabaseTest {
 	private static GraphDatabaseService graphDb;
 	private static MatrixDataGraph mdg;
-	
+
 	      @BeforeClass
 	      public static void setUp() {
-	    	  try {
-				graphDb =  new ImpermanentGraphDatabase();
-				mdg = new MatrixDataGraph(graphDb).createNodespace();				
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
+                graphDb =  new ImpermanentGraphDatabase();
+                mdg = new MatrixDataGraph(graphDb).createNodespace();
 	      }
-	  
+
 	      @AfterClass
 	      public static void tearDown() {
 	          graphDb.shutdown();
