@@ -7,3 +7,7 @@ target
 *.log
 tmp
 .idea
+.classpath
+.project
+.settings
+
