@@ -20,6 +20,7 @@
 package org.neo4j.kernel;
 
 import org.neo4j.kernel.impl.core.*;
+import org.neo4j.kernel.impl.nioneo.store.FileLock;
 import org.neo4j.kernel.impl.nioneo.store.FileSystemAbstraction;
 import org.neo4j.kernel.impl.nioneo.store.StoreId;
 import org.neo4j.kernel.impl.transaction.LockManager;
@@ -29,6 +30,8 @@ import org.neo4j.rest.graphdb.RestGraphDatabase;
 
 import javax.transaction.*;
 import javax.transaction.xa.XAResource;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.util.Collections;
 import java.util.Map;
 
@@ -53,7 +56,42 @@ public class RestConfig extends Config {
                 },
                 null,null,
                 null,null,null,null,null,
-                null);
+                new FileSystemAbstraction() {
+                    @Override
+                    public FileChannel open(String fileName, String mode) throws IOException {
+                        return null;
+                    }
+
+                    @Override
+                    public FileLock tryLock(String fileName, FileChannel channel) throws IOException {
+                        return null;
+                    }
+
+                    @Override
+                    public FileChannel create(String fileName) throws IOException {
+                        return null;
+                    }
+
+                    @Override
+                    public boolean fileExists(String fileName) {
+                        return false;
+                    }
+
+                    @Override
+                    public long getFileSize(String fileName) {
+                        return 0;
+                    }
+
+                    @Override
+                    public boolean deleteFile(String fileName) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean renameFile(String from, String to) throws IOException {
+                        return false;
+                    }
+                });
     }
 
     private static class NullTransactionManager implements TransactionManager {
