@@ -22,15 +22,8 @@ package org.neo4j.rest.graphdb;
 import org.neo4j.graphdb.*;
 import org.neo4j.graphdb.event.KernelEventHandler;
 import org.neo4j.graphdb.event.TransactionEventHandler;
-import org.neo4j.kernel.AbstractGraphDatabase;
-import org.neo4j.kernel.KernelData;
-import org.neo4j.kernel.TransactionBuilder;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.Map;
-
-abstract class AbstractRemoteDatabase extends AbstractGraphDatabase {
+abstract class AbstractRemoteDatabase implements GraphDatabaseService {
     public Transaction beginTx() {
         return new Transaction() {
             public void success() {
@@ -55,15 +48,6 @@ abstract class AbstractRemoteDatabase extends AbstractGraphDatabase {
         };
     }
 
-    @Override
-    public TransactionBuilder tx() {
-        return null;
-    }
-
-    protected AbstractRemoteDatabase(String storeDir) {
-        super(storeDir);
-    }
-
     public <T> TransactionEventHandler<T> registerTransactionEventHandler( TransactionEventHandler<T> tTransactionEventHandler ) {
         throw new UnsupportedOperationException();
     }
@@ -79,14 +63,6 @@ abstract class AbstractRemoteDatabase extends AbstractGraphDatabase {
     public KernelEventHandler unregisterKernelEventHandler( KernelEventHandler kernelEventHandler ) {
         throw new UnsupportedOperationException();
     }
-    
-    public boolean enableRemoteShell() {
-        throw new UnsupportedOperationException();
-    }
-
-    public boolean enableRemoteShell( Map<String, Serializable> config ) {
-        throw new UnsupportedOperationException();
-    }
 
     public Iterable<Node> getAllNodes() {
         throw new UnsupportedOperationException();
@@ -97,16 +73,6 @@ abstract class AbstractRemoteDatabase extends AbstractGraphDatabase {
     }
 
     @Override
-    protected void close() {
-
-    }
-    @Override
-    public <T> Collection<T> getManagementBeans(Class<T> tClass) {
-        return null;
-    }
-
-    @Override
-    public KernelData getKernelData() {
-        return null;
+    public void shutdown() {
     }
 }

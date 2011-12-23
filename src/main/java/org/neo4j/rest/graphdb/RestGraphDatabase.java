@@ -22,18 +22,15 @@ package org.neo4j.rest.graphdb;
 
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
-import org.neo4j.kernel.Config;
-import org.neo4j.kernel.RestConfig;
 import org.neo4j.rest.graphdb.index.RestIndexManager;
 
 
-public class RestGraphDatabase extends AbstractRemoteDatabase {   
+public class RestGraphDatabase extends AbstractRemoteDatabase {
     private RestAPI restAPI;
 
     
     public RestGraphDatabase( RestAPI api){
-        super(api.getStoreDir());
-    	this.restAPI = api;    	
+    	this.restAPI = api;
     }
     
     public RestGraphDatabase( String uri ) {
@@ -82,10 +79,5 @@ public class RestGraphDatabase extends AbstractRemoteDatabase {
     public long getPropertyRefetchTimeInMillis() {
         return this.restAPI.getPropertyRefetchTimeInMillis();
 	}
-
-    @Override
-    public Config getConfig() {
-        return new RestConfig(this);
-    }
-
 }
+
