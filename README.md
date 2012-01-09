@@ -7,11 +7,13 @@ ___________________
  * the new Index API
  * Basic Http Auth (Digest)
  * preliminary traversal support
-
+ * cypher, gremlin support
+ * support for batch API
+ * preliminary support for arbitrary server plugins and extensions
+ 
 Open issues:
 ____________
  * full traversal support
- * support for exposing server extensions - via an interface based proxy
 
 Usage:
 ------
@@ -21,7 +23,7 @@ Build it locally. Then use the maven / ivy dependency or copy the jar into your 
     <dependency>
 		<groupId>org.neo4j</groupId>
 		<artifactId>neo4j-rest-graphdb</artifactId>
-		<version>0.1-SNAPSHOT</version>
+		<version>1.6.M02</version>
     </dependency>
 
     GraphDatabaseService gds = new RestGraphDatabase(new URI("http://localhost:7474/db/data"));
@@ -43,6 +45,6 @@ References / Community:
 -----------------------
 
  * [Neo4j community site](http://neo4j.org)
- * [Neo4j REST API](http://components.neo4j.org/neo4j-server/snapshot/rest.html)
- * [Neo4j Wiki](http://wiki.neo4j.org)
- * [Neo4j Mailing List](https://lists.neo4j.org/mailman/listinfo/user)
+ * [Neo4j REST API](http://docs.neo4j.org/chunked/milestone/rest-api.html)
+ * [Neo4j Docs](http://docs.neo4j.org)
+ * [Neo4j Mailing List](http://neo4j.org/forums)
