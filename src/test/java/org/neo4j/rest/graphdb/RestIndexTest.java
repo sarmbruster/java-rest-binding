@@ -48,6 +48,23 @@ public class RestIndexTest extends RestTestBase {
         Assert.assertEquals("index results", true, hits.hasNext());
         Assert.assertEquals(node(), hits.next());
     }
+    @Test
+    public void testPutNodeIfAbsentIndex() {
+        final Node node = nodeIndex().putIfAbsent(node(), "name", "test");
+        Assert.assertEquals(node(), node);
+        IndexHits<Node> hits = nodeIndex().get("name", "test");
+        Assert.assertEquals("index results", true, hits.hasNext());
+        Assert.assertEquals(node(), hits.next());
+    }
+    @Test
+    public void testPutNodeIfAbsentWithExistingNodeIndex() {
+        nodeIndex().add(node(), "name", "test");
+        final Node node = nodeIndex().putIfAbsent(node(), "name", "test");
+        Assert.assertEquals(node(), node);
+        IndexHits<Node> hits = nodeIndex().get("name", "test");
+        Assert.assertEquals("index results", true, hits.hasNext());
+        Assert.assertEquals(node(), hits.next());
+    }
 
     @Test
     public void testNotFoundInNodeIndex() {

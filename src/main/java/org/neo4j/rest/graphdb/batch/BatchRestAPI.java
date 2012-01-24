@@ -74,7 +74,7 @@ public class BatchRestAPI extends RestAPI {
           
     
     @Override
-    public RestRelationship createRestRelationship(RequestResult requestResult, Node startNode) {          
+    public RestRelationship createRestRelationship(RequestResult requestResult, PropertyContainer element) {
         final long batchId = requestResult.getBatchId();
         RestRelationship relationship = new RestRelationship("{"+batchId+"}", this);
         getRecordingRequest().getOperations().addToRestOperation(batchId, relationship, new RestEntityExtractor(this));

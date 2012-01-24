@@ -20,12 +20,14 @@
 package org.neo4j.rest.graphdb.index;
 
 
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.index.lucene.QueryContext;
 import org.neo4j.rest.graphdb.ExecutingRestRequest;
 import org.neo4j.rest.graphdb.RestAPI;
+import org.neo4j.rest.graphdb.RestGraphDatabase;
 import org.neo4j.rest.graphdb.RestRequest;
 
 /**
@@ -47,7 +49,10 @@ public abstract class RestIndex<T extends PropertyContainer> implements Index<T>
         this.restApi = restApi;
     }
 
-   
+    @Override
+    public GraphDatabaseService getGraphDatabase() {
+       return new RestGraphDatabase(restApi);
+    }
 
     private String getTypeName() {
         return getEntityType().getSimpleName().toLowerCase();
@@ -56,7 +61,11 @@ public abstract class RestIndex<T extends PropertyContainer> implements Index<T>
     public void add( T entity, String key, Object value ) {
        restApi.addToIndex(entity, this, key, value);
     }
-    
+    public T putIfAbsent( T entity, String key, Object value ) {
+       return restApi.putIfAbsent(entity, this, key, value);
+    }
+
+
     public String indexPath( ) {
         return "index/" + getTypeName() + "/" + indexName;
     }
@@ -110,10 +119,7 @@ public abstract class RestIndex<T extends PropertyContainer> implements Index<T>
         return indexName;
     }
 
-
-
     public RestRequest getRestRequest() {
         return restRequest;
     }
-
 }

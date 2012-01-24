@@ -59,6 +59,8 @@ import org.neo4j.rest.graphdb.services.ServiceInvocation;
 import org.neo4j.rest.graphdb.traversal.RestTraversal;
 import org.neo4j.rest.graphdb.util.JsonHelper;
 
+import static javax.ws.rs.core.Response.Status.CREATED;
+
 
 public class RestAPI {
 
@@ -109,7 +111,7 @@ public class RestAPI {
     }
 
     public Node createRestNode(RequestResult requestResult) {
-        if (requestResult.statusOtherThan(Status.CREATED)) {
+        if (requestResult.statusOtherThan(CREATED)) {
             final int status = requestResult.getStatus();
             throw new RuntimeException("" + status);
         }
@@ -127,14 +129,14 @@ public class RestAPI {
         return createRestRelationship(requestResult, startNode);
     }
 
-    public RestRelationship createRestRelationship(RequestResult requestResult, Node startNode) {
+    public RestRelationship createRestRelationship(RequestResult requestResult, PropertyContainer element) {
 
-        if (requestResult.statusOtherThan(javax.ws.rs.core.Response.Status.CREATED)) {
+        if (requestResult.statusOtherThan(CREATED)) {
             final int status = requestResult.getStatus();
             throw new RuntimeException("" + status);
         }
         final String location = requestResult.getLocation();
-        return new RestRelationship(location, ((RestNode) startNode).getRestApi());
+        return new RestRelationship(location, ((RestEntity) element).getRestApi());
     }
 
     public <T extends PropertyContainer> Index<T> getIndex(String indexName) {
@@ -330,7 +332,26 @@ public class RestAPI {
         final RequestResult result = index.getRestRequest().post(index.indexPath(), data);       
         if (result.getStatus()!=201) throw new RuntimeException(String.format("Error adding element %d %s %s to index %s", restEntity.getId(), key, value, index.getIndexName()));
     }
-      
+
+    @SuppressWarnings("unchecked")
+    public <T> T putIfAbsent( T entity, RestIndex index,  String key, Object value ) {
+        final RestEntity restEntity = (RestEntity) entity;
+        String uri = restEntity.getUri();
+        if (value instanceof ValueContext) {
+            value = ((ValueContext)value).getCorrectValue();
+        }
+        final Map<String, Object> data = MapUtil.map("key", key, "value", value, "uri", uri);
+        final RequestResult result = index.getRestRequest().post(index.indexPath()+ "?unique", data);
+        if (result.getStatus()==201) {
+            if (index.getEntityType().equals(Node.class)) return (T)createRestNode(result);
+            if (index.getEntityType().equals(Relationship.class)) return (T)createRestRelationship(result,restEntity);
+        }
+        if (result.getStatus() == 200) {
+            return (T)createExtractor().convertFromRepresentation(result);
+        }
+        throw new RuntimeException(String.format("Error adding element %d %s %s to index %s", restEntity.getId(), key, value, index.getIndexName()));
+    }
+
 
      public <T> T getPlugin(Class<T> type){
         return RestInvocationHandler.getInvocationProxy(type, this, new PluginInvocation(this, type));
