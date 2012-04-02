@@ -64,14 +64,14 @@ public class RestIndexManager implements IndexManager {
     	return config == null || config.isEmpty();
     }
 
-    public Index<Node> forNodes( String indexName ) {
+    public RestIndex<Node> forNodes( String indexName ) {
     	if (!checkIndex(NODE, indexName, null)){    		
     		createIndex(NODE, indexName,  LuceneIndexImplementation.EXACT_CONFIG);
     	}
         return new RestNodeIndex( restRequest, indexName, restApi );
     }
 
-    public Index<Node> forNodes( String indexName, Map<String, String> config ) { 
+    public RestIndex<Node> forNodes( String indexName, Map<String, String> config ) {
     	if (noConfigProvided(config)){
     		throw new IllegalArgumentException("No index configuration was provided!");
     	}

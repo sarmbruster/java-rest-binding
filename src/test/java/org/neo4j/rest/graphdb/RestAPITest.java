@@ -19,7 +19,10 @@
  */
 package org.neo4j.rest.graphdb;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
+import static org.neo4j.helpers.collection.MapUtil.map;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +36,9 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.index.impl.lucene.LuceneIndexImplementation;
+import org.neo4j.rest.graphdb.entity.RestNode;
+import org.neo4j.rest.graphdb.entity.RestRelationship;
+import org.neo4j.rest.graphdb.index.RestIndex;
 import org.neo4j.rest.graphdb.index.RestIndexManager;
 import org.neo4j.rest.graphdb.util.TestHelper;
 
@@ -256,5 +262,32 @@ public class RestAPITest extends RestTestBase {
 		assertTrue(index.existsForNodes("indexName"));
 		assertTrue(index.existsForRelationships("indexName"));
 	}
-	
+
+    @Test
+    public void testCreateNodeUniquely() {
+        final RestIndex<Node> index = restAPI.createIndex(Node.class, "unique-node", LuceneIndexImplementation.EXACT_CONFIG);
+        final RestNode node1 = restAPI.getOrCreateNode(index, "uid", "42", map("name", "Michael"));
+        final RestNode node2 = restAPI.getOrCreateNode(index, "uid", "42", map("name", "Michael2"));
+        assertEquals(node1,node2);
+        assertEquals("Michael",node1.getProperty("name"));
+        assertEquals("Michael",node2.getProperty("name"));
+        final RestNode node3 = restAPI.getOrCreateNode(index, "uid", "41", map("name", "Emil"));
+        assertEquals(false, node1.equals(node3));
+    }
+    @Test
+    public void testCreateRelationshipUniquely() {
+        final RestIndex<Relationship> index = restAPI.createIndex(Relationship.class, "unique-rel", LuceneIndexImplementation.EXACT_CONFIG);
+        final RestNode michael = restAPI.createNode(map("name", "Michael"));
+        final RestNode david = restAPI.createNode(map("name","David"));
+        final RestNode peter = restAPI.createNode(map("name","Peter"));
+
+
+        final RestRelationship rel1 = restAPI.getOrCreateRelationship(index, "uid", "42", michael, david, "KNOWS", map("at", "Neo4j"));
+        final RestRelationship rel2 = restAPI.getOrCreateRelationship(index, "uid", "42", michael, david, "KNOWS", map("at", "Neo4j"));
+        assertEquals(rel1,rel2);
+        assertEquals("Neo4j",rel1.getProperty("at"));
+        assertEquals("Neo4j",rel2.getProperty("at"));
+        final RestRelationship rel3 = restAPI.getOrCreateRelationship(index, "uid", "41", michael, david, "KNOWS", map("at", "Neo4j"));
+        assertEquals(false, rel3.equals(rel1));
+    }
 }
