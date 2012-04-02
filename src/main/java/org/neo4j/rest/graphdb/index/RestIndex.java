@@ -122,4 +122,8 @@ public abstract class RestIndex<T extends PropertyContainer> implements Index<T>
     public RestRequest getRestRequest() {
         return restRequest;
     }
+
+    public String uniqueIndexPath() {
+        return indexPath() + "?unique";
+    }
 }

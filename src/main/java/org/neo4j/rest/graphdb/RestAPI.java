@@ -19,15 +19,6 @@
  */
 package org.neo4j.rest.graphdb;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.PropertyContainer;
@@ -59,6 +50,14 @@ import org.neo4j.rest.graphdb.services.ServiceInvocation;
 import org.neo4j.rest.graphdb.traversal.RestTraversal;
 import org.neo4j.rest.graphdb.util.JsonHelper;
 
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import static javax.ws.rs.core.Response.Status.CREATED;
 
 
@@ -88,7 +87,7 @@ public class RestAPI {
         return new RestIndexManager(restRequest, this);
     }
 
-    public Node getNodeById(long id) {
+    public RestNode getNodeById(long id) {
         RequestResult response = restRequest.get("node/" + id);
         if (response.statusIs(Status.NOT_FOUND)) {
             throw new NotFoundException("" + id);
@@ -96,7 +95,7 @@ public class RestAPI {
         return new RestNode(response.toMap(), this);
     }
 
-    public Relationship getRelationshipById(long id) {
+    public RestRelationship getRelationshipById(long id) {
         RequestResult requestResult = restRequest.get("relationship/" + id);
         if (requestResult.statusIs(Status.NOT_FOUND)) {
             throw new NotFoundException("" + id);
@@ -105,12 +104,12 @@ public class RestAPI {
     }
 
 
-    public Node createNode(Map<String, Object> props) {
+    public RestNode createNode(Map<String, Object> props) {
         RequestResult requestResult = restRequest.post("node", props);
         return createRestNode(requestResult);
     }
 
-    public Node createRestNode(RequestResult requestResult) {
+    public RestNode createRestNode(RequestResult requestResult) {
         if (requestResult.statusOtherThan(CREATED)) {
             final int status = requestResult.getStatus();
             throw new RuntimeException("" + status);
@@ -139,19 +138,21 @@ public class RestAPI {
         return new RestRelationship(location, ((RestEntity) element).getRestApi());
     }
 
-    public <T extends PropertyContainer> Index<T> getIndex(String indexName) {
+    @SuppressWarnings("unchecked")
+    public <T extends PropertyContainer> RestIndex<T> getIndex(String indexName) {
         final RestIndexManager index = this.index();
-        if (index.existsForNodes(indexName)) return (Index<T>) index.forNodes(indexName);
-        if (index.existsForRelationships(indexName)) return (Index<T>) index.forRelationships(indexName);
+        if (index.existsForNodes(indexName)) return (RestIndex<T>) index.forNodes(indexName);
+        if (index.existsForRelationships(indexName)) return (RestIndex<T>) index.forRelationships(indexName);
         throw new IllegalArgumentException("Index " + indexName + " does not yet exist");
     }
 
-    public <T extends PropertyContainer> Index<T> createIndex(Class<T> type, String indexName, Map<String, String> config) {
+    @SuppressWarnings("unchecked")
+    public <T extends PropertyContainer> RestIndex<T> createIndex(Class<T> type, String indexName, Map<String, String> config) {
         if (Node.class.isAssignableFrom(type)) {
-            return (Index<T>) this.index().forNodes(indexName, config);
+            return (RestIndex<T>) this.index().forNodes(indexName, config);
         }
         if (Relationship.class.isAssignableFrom(type)) {
-            return (Index<T>) this.index().forRelationships(indexName, config);
+            return (RestIndex<T>) this.index().forRelationships(indexName, config);
         }
         throw new IllegalArgumentException("Required Node or Relationship types to create index, got " + type);
     }
@@ -175,7 +176,7 @@ public class RestAPI {
     }
 
     public String getStoreDir() {
-        return restRequest.getUri().toString();
+        return restRequest.getUri();
     }
 
 
@@ -224,6 +225,7 @@ public class RestAPI {
         return uri + "/" + suffix;
     }
 
+    @SuppressWarnings("unchecked")
     private Map<Long, Object> convertRequestResultToEntities(RestOperations operations, RequestResult response) {
         Object result = JsonHelper.readJson(response.getEntity());
         if (RestResultException.isExceptionResult(result)) {
@@ -264,6 +266,7 @@ public class RestAPI {
         return new RestEntityExtractor(this);
     }
 
+    @SuppressWarnings("unchecked")
     public <S extends PropertyContainer> IndexHits<S> queryIndex(String indexPath, Class<S> entityType) {
         RequestResult response = restRequest.get(indexPath);
         if (response.statusIs(Response.Status.OK)) {
@@ -286,6 +289,7 @@ public class RestAPI {
         entity.invalidatePropertyData();
     }
     
+    @SuppressWarnings("unchecked")
     public Map<String, Object> getPropertiesFromEntity(RestEntity entity){
         RequestResult response = entity.getRestRequest().get( "properties" );
         Map<String, Object> properties;
@@ -330,7 +334,7 @@ public class RestAPI {
         }
         final Map<String, Object> data = MapUtil.map("key", key, "value", value, "uri", uri);       
         final RequestResult result = index.getRestRequest().post(index.indexPath(), data);       
-        if (result.getStatus()!=201) throw new RuntimeException(String.format("Error adding element %d %s %s to index %s", restEntity.getId(), key, value, index.getIndexName()));
+        if (result.statusOtherThan(Status.CREATED)) throw new RuntimeException(String.format("Error adding element %d %s %s to index %s", restEntity.getId(), key, value, index.getIndexName()));
     }
 
     @SuppressWarnings("unchecked")
@@ -341,19 +345,39 @@ public class RestAPI {
             value = ((ValueContext)value).getCorrectValue();
         }
         final Map<String, Object> data = MapUtil.map("key", key, "value", value, "uri", uri);
-        final RequestResult result = index.getRestRequest().post(index.indexPath()+ "?unique", data);
-        if (result.getStatus()==201) {
+        final RequestResult result = index.getRestRequest().post(index.uniqueIndexPath(), data);
+        if (result.statusIs(Response.Status.CREATED)) {
             if (index.getEntityType().equals(Node.class)) return (T)createRestNode(result);
             if (index.getEntityType().equals(Relationship.class)) return (T)createRestRelationship(result,restEntity);
         }
-        if (result.getStatus() == 200) {
+        if (result.statusIs(Response.Status.OK)) {
             return (T)createExtractor().convertFromRepresentation(result);
         }
         throw new RuntimeException(String.format("Error adding element %d %s %s to index %s", restEntity.getId(), key, value, index.getIndexName()));
     }
 
+    public RestNode getOrCreateNode(RestIndex<Node> index, String key, Object value, final Map<String,Object> properties) {
+        if (index==null || key == null || value==null) throw new IllegalArgumentException("Unique index "+index+" key "+key+" value must not be null");
+        final Map<String, Object> data = MapUtil.map("key", key, "value", value, "properties", properties);
+        final RequestResult result = index.getRestRequest().post(index.uniqueIndexPath(), data);
+        if (result.statusIs(Response.Status.CREATED) || result.statusIs(Response.Status.OK)) {
+            return (RestNode)createExtractor().convertFromRepresentation(result);
+        }
+        throw new RuntimeException(String.format("Error retrieving or creating node for key %s and value %s with index %s", key, value, index.getIndexName()));
+    }
 
-     public <T> T getPlugin(Class<T> type){
+    public RestRelationship getOrCreateRelationship(RestIndex<Relationship> index, String key, Object value, final RestNode start, final RestNode end, final String type, final Map<String,Object> properties) {
+        if (index==null || key == null || value==null) throw new IllegalArgumentException("Unique index "+index+" key "+key+" value must not be null");
+        if (start == null || end == null || type == null) throw new IllegalArgumentException("Neither start, end nore type must be null");
+        final Map<String, Object> data = MapUtil.map("key", key, "value", value, "properties", properties,"start",start.getUri(), "end",end.getUri(), "type",type);
+        final RequestResult result = index.getRestRequest().post(index.uniqueIndexPath(), data);
+        if (result.statusIs(Response.Status.CREATED) || result.statusIs(Response.Status.OK)) {
+            return (RestRelationship)createExtractor().convertFromRepresentation(result);
+        }
+        throw new RuntimeException(String.format("Error retrieving or creating relationship for key %s and value %s with index %s", key, value, index.getIndexName()));
+    }
+
+    public <T> T getPlugin(Class<T> type){
         return RestInvocationHandler.getInvocationProxy(type, this, new PluginInvocation(this, type));
      }
 
