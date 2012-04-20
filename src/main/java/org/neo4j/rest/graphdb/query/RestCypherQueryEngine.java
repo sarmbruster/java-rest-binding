@@ -19,6 +19,7 @@
  */
 package org.neo4j.rest.graphdb.query;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +54,8 @@ public class RestCypherQueryEngine implements QueryEngine<Map<String,Object>> {
     
     @Override
     public QueryResult<Map<String, Object>> query(String statement, Map<String, Object> params) {
-        final RequestResult requestResult = restRequest.get("ext/CypherPlugin/graphdb/execute_query", MapUtil.map("query", statement, "params", params));
+        params =  (params==null) ? Collections.<String,Object>emptyMap() : params;
+        final RequestResult requestResult = restRequest.post("cypher", MapUtil.map("query", statement, "params", params));
         final Map<?, ?> resultMap = restRequest.toMap(requestResult);
         if (RestResultException.isExceptionResult(resultMap)) throw new RestResultException(resultMap);
         return new RestQueryResult(resultMap,restApi,resultConverter);

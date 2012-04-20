@@ -25,9 +25,16 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicRelationshipType;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.helpers.collection.IteratorUtil;
 import org.neo4j.rest.graphdb.util.TestHelper;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.internal.matchers.IsCollectionContaining.hasItems;
 
 public class RestGraphDbTest extends RestTestBase {
 
@@ -60,20 +67,24 @@ public class RestGraphDbTest extends RestTestBase {
 
     @Test
     public void testBasic() {
-        Node refNode = getRestGraphDb().getReferenceNode();
-        Node node = getRestGraphDb().createNode();
+        final GraphDatabaseService gdb = getRestGraphDb();
+        Node refNode = gdb.getReferenceNode();
+        Node node = gdb.createNode();
+        final RelationshipType TEST = DynamicRelationshipType.withName("TEST");
         Relationship rel = refNode.createRelationshipTo( node,
-                DynamicRelationshipType.withName( "TEST" ) );
+                TEST);
         rel.setProperty( "date", new Date().getTime() );
         node.setProperty( "name", "Mattias test" );
         refNode.createRelationshipTo( node,
-                DynamicRelationshipType.withName( "TEST" ) );
+                TEST);
 
         for ( Relationship relationship : refNode.getRelationships() ) {
             System.out.println( "rel prop:" + relationship.getProperty( "date", null ) );
             Node endNode = relationship.getEndNode();
             System.out.println( "node prop:" + endNode.getProperty( "name", null ) );
         }
+        assertThat(gdb.getAllNodes(),hasItems(refNode, node));
+        assertEquals(TEST.name(), IteratorUtil.single(gdb.getRelationshipTypes()).name());
     }
 
 }

@@ -10,7 +10,7 @@
     <groupId>org.neo4j</groupId>
     <artifactId>neo4j-rest-graphdb</artifactId>
     <packaging>jar</packaging>
-    <version>1.7-SNAPSHOT</version>
+    <version>1.7</version>
     <name>Neo4j - Rest GraphDatabaseService Wrapper</name>
     <description>Neo4j REST binding implementing the GraphDatabaseService interface.</description>
     <properties>
@@ -149,14 +149,6 @@ the relevant Commercial Agreement.
                   <artifactId>jersey-server</artifactId>
               </exclusion>
               <exclusion>
-                  <groupId>org.codehaus.jackson</groupId>
-                  <artifactId>jackson-jaxrs</artifactId>
-              </exclusion>
-              <exclusion>
-                  <groupId>org.codehaus.jackson</groupId>
-                  <artifactId>jackson-mapper-asl</artifactId>
-              </exclusion>
-              <exclusion>
                   <groupId>de.huxhorn.lilith</groupId>
                   <artifactId>de.huxhorn.lilith.3rdparty.rrd4j</artifactId>
               </exclusion>
@@ -247,11 +239,6 @@ the relevant Commercial Agreement.
             <version>3.0.1</version>
         </dependency>  -->
         <!-- Server example dependencies -->
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-            <version>1.6.1</version>
-        </dependency>
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-server</artifactId>

@@ -22,8 +22,25 @@ package org.neo4j.rest.graphdb;
 import org.neo4j.graphdb.*;
 import org.neo4j.graphdb.event.KernelEventHandler;
 import org.neo4j.graphdb.event.TransactionEventHandler;
+import org.neo4j.kernel.GraphDatabaseAPI;
+import org.neo4j.kernel.IdGeneratorFactory;
+import org.neo4j.kernel.KernelData;
+import org.neo4j.kernel.TransactionBuilder;
+import org.neo4j.kernel.guard.Guard;
+import org.neo4j.kernel.impl.core.KernelPanicEventGenerator;
+import org.neo4j.kernel.impl.core.LockReleaser;
+import org.neo4j.kernel.impl.core.NodeManager;
+import org.neo4j.kernel.impl.core.RelationshipTypeHolder;
+import org.neo4j.kernel.impl.persistence.PersistenceSource;
+import org.neo4j.kernel.impl.transaction.LockManager;
+import org.neo4j.kernel.impl.transaction.XaDataSourceManager;
+import org.neo4j.kernel.impl.util.StringLogger;
+import org.neo4j.kernel.info.DiagnosticsManager;
 
-abstract class AbstractRemoteDatabase implements GraphDatabaseService {
+import javax.transaction.TransactionManager;
+import java.util.Collection;
+
+abstract class AbstractRemoteDatabase implements GraphDatabaseAPI {
     public Transaction beginTx() {
         return new Transaction() {
             public void success() {
@@ -64,11 +81,83 @@ abstract class AbstractRemoteDatabase implements GraphDatabaseService {
         throw new UnsupportedOperationException();
     }
 
-    public Iterable<Node> getAllNodes() {
+    @Override
+    public Guard getGuard() {
         throw new UnsupportedOperationException();
     }
-  
-    public Iterable<RelationshipType> getRelationshipTypes() {
+
+    @Override
+    public KernelPanicEventGenerator getKernelPanicGenerator() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <T> Collection<T> getManagementBeans(Class<T> type) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public PersistenceSource getPersistenceSource() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public TransactionBuilder tx() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <T> T getSingleManagementBean(Class<T> type) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public KernelData getKernelData() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public IdGeneratorFactory getIdGeneratorFactory() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public RelationshipTypeHolder getRelationshipTypeHolder() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public StringLogger getMessageLog() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public DiagnosticsManager getDiagnosticsManager() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public TransactionManager getTxManager() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public XaDataSourceManager getXaDataSourceManager() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public LockManager getLockManager() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public LockReleaser getLockReleaser() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public NodeManager getNodeManager() {
         throw new UnsupportedOperationException();
     }
 

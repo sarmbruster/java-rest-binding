@@ -20,17 +20,25 @@
 package org.neo4j.rest.graphdb;
 
 
+import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.rest.graphdb.index.RestIndexManager;
+import org.neo4j.rest.graphdb.query.RestCypherQueryEngine;
+import org.neo4j.rest.graphdb.util.ResultConverter;
+
+import java.util.Map;
 
 
 public class RestGraphDatabase extends AbstractRemoteDatabase {
     private RestAPI restAPI;
+    private final RestCypherQueryEngine cypherQueryEngine;
 
-    
+
     public RestGraphDatabase( RestAPI api){
     	this.restAPI = api;
+        cypherQueryEngine = new RestCypherQueryEngine(restAPI);
     }
     
     public RestGraphDatabase( String uri ) {
@@ -67,6 +75,21 @@ public class RestGraphDatabase extends AbstractRemoteDatabase {
         return this.restAPI.getReferenceNode();
     }
 
+    @Override
+    public Iterable<Node> getAllNodes() {
+        return cypherQueryEngine.query("start n=node(*) return n", null).to(Node.class);
+    }
+
+    @Override
+    public Iterable<RelationshipType> getRelationshipTypes() {
+        return cypherQueryEngine.query("start n=node(*) match n-[r]->() return distinct type(r) as rel_type", null).to(RelationshipType.class, new ResultConverter<Map<String, Object>, RelationshipType>() {
+            @Override
+            public RelationshipType convert(Map<String, Object> row, Class<RelationshipType> type) {
+                return DynamicRelationshipType.withName((String)row.get("rel_type"));
+            }
+        });
+    }
+
     public Relationship getRelationshipById( long id ) {
     	return this.restAPI.getRelationshipById(id);
     }    
@@ -79,5 +102,10 @@ public class RestGraphDatabase extends AbstractRemoteDatabase {
     public long getPropertyRefetchTimeInMillis() {
         return this.restAPI.getPropertyRefetchTimeInMillis();
 	}
+
+    @Override
+    public String getStoreDir() {
+        return restAPI.getStoreDir();
+    }
 }
 
