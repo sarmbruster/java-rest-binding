@@ -36,33 +36,14 @@ import org.neo4j.kernel.impl.transaction.LockManager;
 import org.neo4j.kernel.impl.transaction.XaDataSourceManager;
 import org.neo4j.kernel.impl.util.StringLogger;
 import org.neo4j.kernel.info.DiagnosticsManager;
+import org.neo4j.rest.graphdb.transaction.NullTransaction;
 
 import javax.transaction.TransactionManager;
 import java.util.Collection;
 
 abstract class AbstractRemoteDatabase implements GraphDatabaseAPI {
     public Transaction beginTx() {
-        return new Transaction() {
-            public void success() {
-            }
-
-            public void finish() {
-
-            }
-
-            public void failure() {
-            }
-
-            @Override
-            public Lock acquireWriteLock(PropertyContainer propertyContainer) {
-                return null;
-            }
-
-            @Override
-            public Lock acquireReadLock(PropertyContainer propertyContainer) {
-                return null;
-            }
-        };
+        return new NullTransaction();
     }
 
     public <T> TransactionEventHandler<T> registerTransactionEventHandler( TransactionEventHandler<T> tTransactionEventHandler ) {
@@ -164,4 +145,5 @@ abstract class AbstractRemoteDatabase implements GraphDatabaseAPI {
     @Override
     public void shutdown() {
     }
+
 }

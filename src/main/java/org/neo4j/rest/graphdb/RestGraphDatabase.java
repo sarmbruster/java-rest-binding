@@ -26,8 +26,10 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.rest.graphdb.index.RestIndexManager;
 import org.neo4j.rest.graphdb.query.RestCypherQueryEngine;
+import org.neo4j.rest.graphdb.transaction.NullTransactionManager;
 import org.neo4j.rest.graphdb.util.ResultConverter;
 
+import javax.transaction.TransactionManager;
 import java.util.Map;
 
 
@@ -106,6 +108,11 @@ public class RestGraphDatabase extends AbstractRemoteDatabase {
     @Override
     public String getStoreDir() {
         return restAPI.getStoreDir();
+    }
+
+    @Override
+    public TransactionManager getTxManager() {
+        return new NullTransactionManager();
     }
 }
 
