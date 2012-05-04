@@ -19,20 +19,21 @@
  */
 package org.neo4j.rest.graphdb;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.rest.graphdb.batch.BatchCallback;
+import org.neo4j.rest.graphdb.entity.RestNode;
 import org.neo4j.rest.graphdb.entity.RestRelationship;
 import org.neo4j.rest.graphdb.util.TestHelper;
 
@@ -62,8 +63,8 @@ public class BatchRestAPITest extends RestTestBase {
         assertEquals("node2", response.n2.getProperty("name"));
     }
    
-    @Test(expected = IllegalStateException.class)
-    public void testLeakedBatchApiWontWork() {
+    @Test
+    public void testRestApiWorksRegardlessOfSource() {
         RestAPI leaked =this.restAPI.executeBatch(new BatchCallback<RestAPI>() {
             @Override
             public RestAPI recordBatch(RestAPI batchRestApi) {
@@ -71,8 +72,30 @@ public class BatchRestAPITest extends RestTestBase {
             }
         });
         leaked.createNode(map());
+        assertEquals(2,countExistingNodes());
     }
-    
+
+
+    @Test
+    public void testCreateRelationshipToNodeOutsideofBatch() throws Exception {
+        final Node node1 = restAPI.createNode(map());
+
+        restAPI.executeBatch(new BatchCallback<Void>() {
+
+            @Override
+            public Void recordBatch(RestAPI batchRestApi) {
+                Node node2 = batchRestApi.createNode(map());
+
+                // Throws RuntimeException from RestAPI.java, line 135:
+                node1.createRelationshipTo(node2, DynamicRelationshipType.withName("foo"));
+                // WORKAROUND - the following succeeds:
+                // (new RestNode(((RestNode)node1).getUri(), batchRestApi)).createRelationshipTo(node2, relType);
+                return null;
+            }
+
+        });
+    }
+
     @Test
     public void testSetNodeProperties(){
         TestBatchResult response =this.restAPI.executeBatch(new BatchCallback<TestBatchResult>() {
@@ -91,8 +114,8 @@ public class BatchRestAPITest extends RestTestBase {
         assertEquals("node1", response.n1.getProperty("name"));
         assertEquals("true", response.n1.getProperty("test"));
         assertEquals("stilltrue",response.n1.getProperty("test2"));
-        assertEquals("true", getGraphDatabase().getNodeById(response.n1.getId()).getProperty("test"));
-        assertEquals("stilltrue", getGraphDatabase().getNodeById(response.n1.getId()).getProperty("test2"));
+        assertEquals("true", loadRealNode(response.n1).getProperty("test"));
+        assertEquals("stilltrue", loadRealNode(response.n1).getProperty("test2"));
        
     }
     
@@ -109,7 +132,7 @@ public class BatchRestAPITest extends RestTestBase {
                 return result;
             }
         });         
-       getGraphDatabase().getNodeById(response.n1.getId());
+       loadRealNode(response.n1);
       
     }
     
@@ -163,12 +186,16 @@ public class BatchRestAPITest extends RestTestBase {
     public void testAddToIndex() {
         final MatrixDataGraph matrixDataGraph = new MatrixDataGraph(getGraphDatabase());
         matrixDataGraph.createNodespace();
+        final RestNode neoNode = restAPI.getNodeById(matrixDataGraph.getNeoNode().getId());
         final IndexHits<Node> heroes = restAPI.executeBatch(new BatchCallback<IndexHits<Node>>() {
             @Override
             public IndexHits<Node> recordBatch(RestAPI batchRestApi) {
+                restAPI.index().forNodes("heroes").add(neoNode,"indexname","Neo2");
                 Node n1 = batchRestApi.createNode(map("name", "Apoc"));
-                final Index<Node> index = batchRestApi.index().forNodes("heroes");               
+                final Index<Node> index = batchRestApi.index().forNodes("heroes");
                 index.add(n1, "indexname", "Apoc");
+                final Node indexResult = getGraphDatabase().index().forNodes("heroes").get("indexname", "Neo2").getSingle();
+                assertNull(indexResult);
                 return index.query("indexname:Apoc");
             }
         });

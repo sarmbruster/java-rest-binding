@@ -20,7 +20,6 @@
 package org.neo4j.rest.graphdb.services;
 
 import java.lang.reflect.Method;
-import java.util.Map;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -35,28 +34,28 @@ import org.neo4j.rest.graphdb.RestRequest;
 * Date: 21.10.11
 * Time: 00:57
 */
-enum RequestType {
+public enum RequestType {
     PUT {
         @Override
-        RequestResult makeRequest(String uri, Map<String, Object> requestParams, RestRequest restRequest) {
+        public RequestResult makeRequest(String uri, Object requestParams, RestRequest restRequest) {
            return restRequest.put(uri, requestParams);
         }
     },
     POST {
         @Override
-        RequestResult makeRequest(String uri, Map<String, Object> requestParams, RestRequest restRequest) {
+        public RequestResult makeRequest(String uri, Object requestParams, RestRequest restRequest) {
             return restRequest.post(uri, requestParams);
         }
     },
     GET {
         @Override
-        RequestResult makeRequest(String uri, Map<String, Object> requestParams, RestRequest restRequest) {
+        public RequestResult makeRequest(String uri, Object requestParams, RestRequest restRequest) {
            return restRequest.get(uri);
         }
     },
     DELETE {
         @Override
-        RequestResult makeRequest(String uri, Map<String, Object> requestParams, RestRequest restRequest) {
+        public RequestResult makeRequest(String uri, Object requestParams, RestRequest restRequest) {
              return restRequest.delete(uri);
         }
     };
@@ -80,6 +79,6 @@ enum RequestType {
            throw new IllegalArgumentException("missing Annotation for the request type, e.g. @GET");
     }
 
-    abstract RequestResult makeRequest(String uri, Map<String, Object> requestParams, RestRequest restRequest);
+    public abstract RequestResult makeRequest(String uri, Object requestParams, RestRequest restRequest);
 
 }

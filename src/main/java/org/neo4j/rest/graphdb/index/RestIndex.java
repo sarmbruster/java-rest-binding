@@ -25,17 +25,13 @@ import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.index.lucene.QueryContext;
-import org.neo4j.rest.graphdb.ExecutingRestRequest;
-import org.neo4j.rest.graphdb.RestAPI;
-import org.neo4j.rest.graphdb.RestGraphDatabase;
-import org.neo4j.rest.graphdb.RestRequest;
+import org.neo4j.rest.graphdb.*;
 
 /**
  * @author mh
  * @since 24.01.11
  */
 public abstract class RestIndex<T extends PropertyContainer> implements Index<T> {
-    private final RestRequest restRequest;
     private final String indexName;
     public String getIndexName() {
         return indexName;
@@ -43,8 +39,7 @@ public abstract class RestIndex<T extends PropertyContainer> implements Index<T>
 
     protected final RestAPI restApi;
 
-    RestIndex( RestRequest restRequest, String indexName, RestAPI restApi ) {
-        this.restRequest = restRequest;
+    RestIndex(String indexName, RestAPI restApi) {
         this.indexName = indexName;
         this.restApi = restApi;
     }
@@ -92,10 +87,6 @@ public abstract class RestIndex<T extends PropertyContainer> implements Index<T>
     public void delete() {
        restApi.delete(this);
     }
-    
-    public void deleteIndex(String indexPath) {
-        restApi.deleteIndex(this, indexPath);
-    }
 
     public org.neo4j.graphdb.index.IndexHits<T> get( String key, Object value ) {
         final String indexPath = indexPath(key, value);
@@ -118,10 +109,14 @@ public abstract class RestIndex<T extends PropertyContainer> implements Index<T>
     public String getName() {
         return indexName;
     }
-
+/*
     public RestRequest getRestRequest() {
         return restRequest;
     }
+    private Long getBatchId(Map<String, Object> entry) {
+        return ((Number) entry.get("id")).longValue();
+    }
+*/
 
     public String uniqueIndexPath() {
         return indexPath() + "?unique";

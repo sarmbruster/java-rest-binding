@@ -39,7 +39,6 @@ public class RecordingRestRequest implements RestRequest {
     private final String baseUri;   
     private MediaType contentType;
     private MediaType acceptHeader;   
-    private RestRequest restRequest;
     private RestOperations operations;
     private boolean stop;
 
@@ -48,13 +47,12 @@ public class RecordingRestRequest implements RestRequest {
         return operations;
     }
 
-    public RecordingRestRequest( RestRequest restRequest) {       
-        this( restRequest.getUri(), MediaType.APPLICATION_JSON_TYPE,  MediaType.APPLICATION_JSON_TYPE );
-        this.restRequest = restRequest;       
-    }   
+    public RecordingRestRequest(final String baseUri) {
+        this(baseUri, MediaType.APPLICATION_JSON_TYPE,  MediaType.APPLICATION_JSON_TYPE );
+    }
     
-    public RecordingRestRequest( RestRequest restRequest, RestOperations operations  ) {
-       this(restRequest);
+    public RecordingRestRequest(RestOperations operations, final String baseUri) {
+       this(baseUri);
        this.operations = operations;
     }   
     
@@ -88,7 +86,7 @@ public class RecordingRestRequest implements RestRequest {
 
     @Override
     public RestRequest with(String uri) {        
-        return new RecordingRestRequest(this.restRequest.with(uri), this.operations);
+        return new RecordingRestRequest(this.operations, uri);
     }
 
     @Override

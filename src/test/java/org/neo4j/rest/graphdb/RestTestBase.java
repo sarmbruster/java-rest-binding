@@ -28,6 +28,8 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.helpers.collection.IteratorUtil;
+import org.neo4j.tooling.GlobalGraphOperations;
 
 import java.net.URISyntaxException;
 import java.util.Iterator;
@@ -82,5 +84,12 @@ public class RestTestBase {
 	protected GraphDatabaseService getRestGraphDb() {
 		return restGraphDb;
 	}
-	
+
+    protected int countExistingNodes() {
+        return IteratorUtil.count(GlobalGraphOperations.at(getGraphDatabase()).getAllNodes());
+    }
+
+    protected Node loadRealNode(Node node) {
+        return getGraphDatabase().getNodeById(node.getId());
+    }
 }

@@ -27,6 +27,7 @@ import java.util.Map;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
+
 import org.neo4j.rest.graphdb.RequestResult;
 import org.neo4j.rest.graphdb.RestAPI;
 
@@ -49,8 +50,10 @@ public class ServiceInvocation implements RemoteInvocationStrategy{
 
     @Override
     public RequestResult invoke(Method method, Object[] args) {
-
-       return RequestType.determineRequestType(method).makeRequest(createUri(method, args), getRequestParams(method, args), this.restAPI.getRestRequest());
+        final RequestType requestType = RequestType.determineRequestType(method);
+        final String uri = createUri(method, args);
+        final Map<String, Object> params = getRequestParams(method, args);
+        return this.restAPI.execute(requestType,uri, params);
     }
 
 
