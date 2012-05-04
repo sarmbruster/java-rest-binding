@@ -27,13 +27,14 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.helpers.collection.IterableWrapper;
-import org.neo4j.helpers.collection.IteratorUtil;
 import org.neo4j.rest.graphdb.RequestResult;
 import org.neo4j.rest.graphdb.RestAPI;
 import org.neo4j.rest.graphdb.converter.RestResultConverter;
 import org.neo4j.rest.graphdb.converter.TypeInformation;
 import org.neo4j.rest.graphdb.entity.RestNode;
 import org.neo4j.rest.graphdb.entity.RestRelationship;
+
+import static org.neo4j.helpers.collection.IteratorUtil.lastOrNull;
 
 /**
  * @author Michael Hunger
@@ -72,7 +73,7 @@ public class RestPathParser implements RestResultConverter {
     private Path parseFullPath(Map path, final RestAPI restApi) {
         final Collection<Map<?, ?>> nodesData = (Collection<Map<?, ?>>) path.get("nodes");
         final Collection<Map<?, ?>> relationshipsData = (Collection<Map<?, ?>>) path.get("relationships");
-        final Map<?, ?> lastRelationshipData = lastElement(relationshipsData);
+        final Map<?, ?> lastRelationshipData = lastMap(relationshipsData);
         final Map<?, ?> startData = (Map<?, ?>) path.get("start");
         final Map<?, ?> endData = (Map<?, ?>) path.get("end");
         final Integer length = (Integer) path.get("length");
@@ -123,10 +124,10 @@ public class RestPathParser implements RestResultConverter {
     }
 
     private String lastElement(Collection<String> collection){
-       return IteratorUtil.lastOrNull(collection);
+       return lastOrNull(collection);
     }
 
-    private Map<?, ?> lastElement(Collection<Map<?, ?>> collection) {
+    private Map<?, ?> lastMap(Collection<Map<?, ?>> collection) {
         if (collection.isEmpty()) return null;
         if (collection instanceof List) {
             List<Map<?,?>> list = (List<Map<?,?>>) collection;
