@@ -27,14 +27,13 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.helpers.collection.IterableWrapper;
+import org.neo4j.helpers.collection.IteratorUtil;
 import org.neo4j.rest.graphdb.RequestResult;
 import org.neo4j.rest.graphdb.RestAPI;
 import org.neo4j.rest.graphdb.converter.RestResultConverter;
 import org.neo4j.rest.graphdb.converter.TypeInformation;
 import org.neo4j.rest.graphdb.entity.RestNode;
 import org.neo4j.rest.graphdb.entity.RestRelationship;
-
-import static org.neo4j.helpers.collection.IteratorUtil.lastOrNull;
 
 /**
  * @author Michael Hunger
@@ -78,10 +77,11 @@ public class RestPathParser implements RestResultConverter {
         final Map<?, ?> endData = (Map<?, ?>) path.get("end");
         final Integer length = (Integer) path.get("length");
 
+        RestRelationship lastRelationship = lastRelationshipData == null ? null : new RestRelationship(lastRelationshipData, restApi);
         return new SimplePath(
                 new RestNode(startData,restApi),
                 new RestNode(endData,restApi),
-                new RestRelationship(lastRelationshipData,restApi),
+                lastRelationship,
                 length,
                 new IterableWrapper<Node, Map<?,?>>(nodesData) {
                     @Override
@@ -104,10 +104,11 @@ public class RestPathParser implements RestResultConverter {
         final String startData = (String) path.get("start");
         final String endData = (String) path.get("end");
         final Integer length = (Integer) path.get("length");
+        RestRelationship lastRelationship = lastRelationshipData == null ? null : new RestRelationship(lastRelationshipData, restApi);
         return new SimplePath(
                 new RestNode(startData,restApi),
                 new RestNode(endData,restApi),
-                new RestRelationship(lastRelationshipData,restApi),
+                lastRelationship,
                 length,
                 new IterableWrapper<Node, String>(nodesData) {
                     @Override
@@ -124,7 +125,7 @@ public class RestPathParser implements RestResultConverter {
     }
 
     private String lastElement(Collection<String> collection){
-       return lastOrNull(collection);
+       return IteratorUtil.lastOrNull(collection);
     }
 
     private Map<?, ?> lastMap(Collection<Map<?, ?>> collection) {

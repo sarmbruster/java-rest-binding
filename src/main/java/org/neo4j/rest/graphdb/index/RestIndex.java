@@ -30,6 +30,8 @@ import org.neo4j.rest.graphdb.RestAPI;
 import org.neo4j.rest.graphdb.RestGraphDatabase;
 import org.neo4j.rest.graphdb.RestRequest;
 
+import static org.neo4j.rest.graphdb.ExecutingRestRequest.encode;
+
 /**
  * @author mh
  * @since 24.01.11
@@ -71,10 +73,10 @@ public abstract class RestIndex<T extends PropertyContainer> implements Index<T>
     }
 
     public String indexPath( String key, Object value ) {
-        return "index/" + getTypeName() + "/" + indexName + (key!=null? "/" + ExecutingRestRequest.encode( key ) :"") + (value!=null ? "/" + ExecutingRestRequest.encode( value ):"");
+        return "index/" + getTypeName() + "/" + indexName + (key!=null? "/" + encode(key) :"") + (value!=null ? "/" + encode(value):"");
     }
     private String queryPath( String key, Object value ) {
-        return indexPath(key,null) + "?query="+ExecutingRestRequest.encode( value );
+        return indexPath(key,null) + "?query="+ encode(value);
     }
 
     public void remove( T entity, String key, Object value ) {

@@ -48,6 +48,14 @@ public class RestIndexTest extends RestTestBase {
         Assert.assertEquals("index results", true, hits.hasNext());
         Assert.assertEquals(node(), hits.next());
     }
+
+    @Test
+    public void testUseCriticalCharactersInKeyAndValue() {
+        nodeIndex().add(node(), "na#me", "te?t");
+        IndexHits<Node> hits = nodeIndex().get("na#me", "te?t");
+        Assert.assertEquals("index results", true, hits.hasNext());
+        Assert.assertEquals(node(), hits.next());
+    }
     @Test
     public void testPutNodeIfAbsentIndex() {
         final Node node = nodeIndex().putIfAbsent(node(), "name", "test");
