@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.helpers.collection.ClosableIterable;
+import org.neo4j.helpers.collection.IteratorUtil;
 import org.neo4j.helpers.collection.IteratorWrapper;
 
 
@@ -62,11 +63,17 @@ public class QueryResultBuilder<T> implements QueryResult<T> {
             @Override
             public R single() {
                 try {
-                    final Iterator<T> it = result.iterator();
-                    if (!it.hasNext()) throw new IllegalStateException("Expected at least one result, got none.");
-                    final T value = it.next();
-                    if (it.hasNext())
-                        throw new IllegalStateException("Expected at least one result, got more than one.");
+                    final T value = IteratorUtil.single(QueryResultBuilder.this.result);
+                    return resultConverter.convert(value, type);
+                } finally {
+                    closeIfNeeded();
+                }
+            }
+
+            @Override
+            public R singleOrNull() {
+                try {
+                    final T value = IteratorUtil.singleOrNull(QueryResultBuilder.this.result);
                     return resultConverter.convert(value, type);
                 } finally {
                     closeIfNeeded();
