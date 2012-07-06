@@ -71,4 +71,12 @@ public class NodePath implements Path {
     public Iterator<PropertyContainer> iterator() {
         return Arrays.<PropertyContainer>asList(node).iterator();
     }
+
+    public Iterable<Relationship> reverseRelationships() {
+        return relationships();
+    }
+
+    public Iterable<Node> reverseNodes() {
+        return nodes();
+    }
 }

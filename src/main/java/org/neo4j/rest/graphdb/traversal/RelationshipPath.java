@@ -70,4 +70,12 @@ public class RelationshipPath implements Path {
     public Iterator<PropertyContainer> iterator() {
         return Arrays.<PropertyContainer>asList(startNode(), lastRelationship(), endNode()).iterator();
     }
+
+    public Iterable<Relationship> reverseRelationships() {
+        return relationships();
+    }
+
+    public Iterable<Node> reverseNodes() {
+        return asList(endNode(),startNode());
+    }
 }

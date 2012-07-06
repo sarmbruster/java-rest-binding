@@ -27,6 +27,7 @@ import java.util.Map;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.traversal.TraversalMetadata;
 import org.neo4j.graphdb.traversal.Traverser;
 import org.neo4j.helpers.collection.IterableWrapper;
 
@@ -71,5 +72,10 @@ public class RestTraverser implements Traverser {
 
     public Iterator<Path> iterator() {
         return paths.iterator();
+    }
+
+    @Override
+    public TraversalMetadata metadata() {
+        throw new UnsupportedOperationException();
     }
 }

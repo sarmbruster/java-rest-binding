@@ -33,8 +33,7 @@ import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.index.IndexManager;
-import org.neo4j.graphdb.traversal.TraversalDescription;
-import org.neo4j.graphdb.traversal.Traverser;
+import org.neo4j.graphdb.traversal.*;
 import org.neo4j.helpers.Predicate;
 import org.neo4j.kernel.Traversal;
 import org.neo4j.rest.graphdb.MatrixDataGraph.RelTypes;
@@ -161,7 +160,7 @@ public class MatrixDatabaseRestTest extends RestTestBase{
         		   .maxDepth(10)
                    .breadthFirst()                         
                    .relationships( RelTypes.KNOWS, Direction.OUTGOING )
-                   .filter(Traversal.returnAllButStartNode());                 
+                   .evaluator(Evaluators.excludeStartPosition());
            return td.traverse( person );
        }
       
@@ -218,7 +217,11 @@ public class MatrixDatabaseRestTest extends RestTestBase{
                 .relationships( RelTypes.PERSONS_REFERENCE, Direction.OUTGOING )
                 .relationships( RelTypes.HEROES_REFERENCE, Direction.OUTGOING )
                 .relationships( RelTypes.HERO, Direction.OUTGOING )                              
-                .filter(new Predicate<Path>() { public boolean accept(Path path) { return path.endNode().getProperty("type","none").equals("hero");}});
+                .evaluator(new Evaluator() {
+                    public Evaluation evaluate(Path path) {
+                        return path.endNode().getProperty("type", "none").equals("hero") ? Evaluation.INCLUDE_AND_PRUNE : Evaluation.EXCLUDE_AND_CONTINUE;
+                    }
+                });
     	 return td.traverse(this.embeddedmdg.getGraphDatabase().getReferenceNode());
       }
 

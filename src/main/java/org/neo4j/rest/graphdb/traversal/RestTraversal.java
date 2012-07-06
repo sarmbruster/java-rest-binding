@@ -19,34 +19,16 @@
  */
 package org.neo4j.rest.graphdb.traversal;
 
-import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import javax.ws.rs.core.Response;
-
-import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Path;
-import org.neo4j.graphdb.RelationshipExpander;
-import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.traversal.BranchOrderingPolicy;
-import org.neo4j.graphdb.traversal.Evaluator;
-import org.neo4j.graphdb.traversal.PruneEvaluator;
+import org.neo4j.graphdb.*;
+import org.neo4j.graphdb.traversal.*;
 import org.neo4j.graphdb.traversal.Traverser;
-import org.neo4j.graphdb.traversal.UniquenessFactory;
 import org.neo4j.helpers.Predicate;
 import org.neo4j.kernel.Traversal;
 import org.neo4j.kernel.Uniqueness;
-
-import org.neo4j.rest.graphdb.RequestResult;
-import org.neo4j.rest.graphdb.RestAPI;
-import org.neo4j.rest.graphdb.RestRequest;
 import org.neo4j.rest.graphdb.entity.RestNode;
+
+import java.lang.reflect.Field;
+import java.util.*;
 
 /**
  * @author Michael Hunger
@@ -103,13 +85,15 @@ public class RestTraversal implements RestTraversalDescription {
     }
 
     public RestTraversalDescription filter(Predicate<Path> pathPredicate) {
-        if (pathPredicate == Traversal.returnAll()) return add("return_filter",toMap("language","builtin", "name","all"));
-        if (pathPredicate == Traversal.returnAllButStartNode()) return add("return_filter",toMap("language","builtin", "name","all_but_start_node"));
+        if (pathPredicate == Evaluators.all()) return add("return_filter",toMap("language","builtin", "name","all"));
+        if (pathPredicate == Evaluators.excludeStartPosition()) return add("return_filter",toMap("language","builtin", "name","all_but_start_node"));
         throw new UnsupportedOperationException("Only builtin paths supported");
     }
 
     public RestTraversalDescription evaluator(Evaluator evaluator) {
-    	 throw new UnsupportedOperationException();
+        if (evaluator == Evaluators.all()) return add("return_filter",toMap("language","builtin", "name","all"));
+        if (evaluator == Evaluators.excludeStartPosition()) return add("return_filter",toMap("language","builtin", "name","all_but_start_node"));
+        throw new UnsupportedOperationException("Only builtin paths supported");
     }
 
     public RestTraversalDescription prune(ScriptLanguage language, String code) {
@@ -121,7 +105,7 @@ public class RestTraversal implements RestTraversalDescription {
     }
 
     public RestTraversalDescription maxDepth(int depth) {
-        return add("max_depth",depth);
+        return add("max_depth", depth);
     }
 
     public RestTraversalDescription order(BranchOrderingPolicy branchOrderingPolicy) {
@@ -170,7 +154,7 @@ public class RestTraversal implements RestTraversalDescription {
     }
 
     public RestTraversalDescription expand(RelationshipExpander relationshipExpander) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public Traverser traverse(Node node) {
@@ -184,5 +168,30 @@ public class RestTraversal implements RestTraversalDescription {
 
     public Map<String,Object> getPostData() {
         return description;
+    }
+
+    @Override
+    public TraversalDescription expand(PathExpander<?> expander) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <STATE> TraversalDescription expand(PathExpander<STATE> expander, InitialStateFactory<STATE> initialState) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public TraversalDescription sort(Comparator<? super Path> comparator) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public TraversalDescription reverse() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Traverser traverse(Node... startNode) {
+        throw new UnsupportedOperationException();
     }
 }

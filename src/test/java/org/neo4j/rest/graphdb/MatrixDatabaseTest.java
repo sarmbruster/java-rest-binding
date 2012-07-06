@@ -29,9 +29,7 @@ import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.index.IndexManager;
-import org.neo4j.graphdb.traversal.Evaluators;
-import org.neo4j.graphdb.traversal.TraversalDescription;
-import org.neo4j.graphdb.traversal.Traverser;
+import org.neo4j.graphdb.traversal.*;
 import org.neo4j.helpers.Predicate;
 import org.neo4j.kernel.Traversal;
 import org.neo4j.rest.graphdb.MatrixDataGraph.RelTypes;
@@ -193,8 +191,12 @@ public class MatrixDatabaseTest {
                        .relationships( RelTypes.PERSONS_REFERENCE, Direction.OUTGOING )
                        .relationships( RelTypes.HEROES_REFERENCE, Direction.OUTGOING )
                        .relationships( RelTypes.HERO, Direction.OUTGOING )
-                       .filter(Traversal.returnAllButStartNode())               
-                       .filter(new Predicate<Path>() { public boolean accept(Path path) { return path.endNode().getProperty("type","none").equals("hero");}});
+                       .evaluator(Evaluators.excludeStartPosition())
+                       .evaluator(new Evaluator() {
+                           public Evaluation evaluate(Path path) {
+                               return path.endNode().getProperty("type", "none").equals("hero") ? Evaluation.INCLUDE_AND_PRUNE : Evaluation.EXCLUDE_AND_CONTINUE;
+                           }
+                       });
          	 return td.traverse(mdg.getGraphDatabase().getReferenceNode());
            }
            
@@ -245,7 +247,7 @@ public class MatrixDatabaseTest {
                             .relationships( RelTypes.CODED_BY, Direction.OUTGOING )
                             .relationships( RelTypes.KNOWS, Direction.OUTGOING )
                             .evaluator(
-                                    Evaluators.returnWhereLastRelationshipTypeIs( RelTypes.CODED_BY ) );
+                                    Evaluators.includeWhereLastRelationshipTypeIs(RelTypes.CODED_BY) );
                     return td.traverse( startNode );
                 }
 

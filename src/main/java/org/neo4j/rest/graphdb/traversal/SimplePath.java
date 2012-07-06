@@ -19,12 +19,16 @@
  */
 package org.neo4j.rest.graphdb.traversal;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.helpers.collection.IteratorUtil;
 
 /**
  * @author Michael Hunger
@@ -101,5 +105,17 @@ public class SimplePath implements Path {
                 next.remove();
             }
         };
+    }
+
+    public Iterable<Relationship> reverseRelationships() {
+        List<Relationship> reverseRels = IteratorUtil.addToCollection(relationships, new ArrayList<Relationship>());
+        Collections.reverse(reverseRels);
+        return reverseRels;
+    }
+
+    public Iterable<Node> reverseNodes() {
+        List<Node> reverseNodes = IteratorUtil.addToCollection(nodes, new ArrayList<Node>());
+        Collections.reverse(reverseNodes);
+        return reverseNodes;
     }
 }

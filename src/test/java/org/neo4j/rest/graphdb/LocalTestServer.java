@@ -19,43 +19,38 @@
  */
 package org.neo4j.rest.graphdb;
 
-import org.apache.commons.configuration.Configuration;
 import org.mortbay.component.LifeCycle;
 import org.mortbay.jetty.Server;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.kernel.AbstractGraphDatabase;
-import org.neo4j.server.Bootstrapper;
-import org.neo4j.server.NeoServerWithEmbeddedWebServer;
+import org.neo4j.server.CommunityNeoServer;
 import org.neo4j.server.configuration.PropertyFileConfigurator;
 import org.neo4j.server.database.Database;
-import org.neo4j.server.database.GraphDatabaseFactory;
 import org.neo4j.server.modules.RESTApiModule;
 import org.neo4j.server.modules.ServerModule;
 import org.neo4j.server.modules.ThirdPartyJAXRSModule;
 import org.neo4j.server.startup.healthcheck.StartupHealthCheck;
-import org.neo4j.server.startup.healthcheck.StartupHealthCheckRule;
 import org.neo4j.server.web.Jetty6WebServer;
+import org.neo4j.server.web.WebServer;
 import org.neo4j.test.ImpermanentGraphDatabase;
 
 import java.io.File;
 import java.net.URI;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import static java.util.Arrays.asList;
 
 /**
  * @author mh
  * @since 24.03.11
  */
 public class LocalTestServer {
-    private NeoServerWithEmbeddedWebServer neoServer;
+    private CommunityNeoServer neoServer;
     private final int port;
     private final String hostname;
     protected String propertiesFile = "test-db.properties";
+    private final ImpermanentGraphDatabase graphDatabase;
 
     public LocalTestServer() {
         this("localhost",7473);
@@ -64,34 +59,13 @@ public class LocalTestServer {
     public LocalTestServer(String hostname, int port) {
         this.port = port;
         this.hostname = hostname;
+        graphDatabase = new ImpermanentGraphDatabase();
     }
 
     public void start() {
         if (neoServer!=null) throw new IllegalStateException("Server already running");
         URL url = getClass().getResource("/" + propertiesFile);
         if (url==null) throw new IllegalArgumentException("Could not resolve properties file "+propertiesFile);
-        final List<Class<? extends ServerModule>> serverModules = Arrays.asList(RESTApiModule.class, ThirdPartyJAXRSModule.class);
-        final Bootstrapper bootstrapper = new Bootstrapper() {
-            @Override
-            protected GraphDatabaseFactory getGraphDatabaseFactory(Configuration configuration) {
-                return new GraphDatabaseFactory() {
-                    @Override
-                    public AbstractGraphDatabase createDatabase(String databaseStoreDirectory, Map<String, String> databaseProperties) {
-                       return new ImpermanentGraphDatabase();
-                    }
-                };
-            }
-
-            @Override
-            protected Iterable<StartupHealthCheckRule> getHealthCheckRules() {
-                return Collections.emptyList();
-            }
-
-            @Override
-            protected Iterable<Class<? extends ServerModule>> getServerModules() {
-                return serverModules;
-            }
-        };
         final Jetty6WebServer jettyWebServer = new Jetty6WebServer() {
             @Override
             protected void startJetty() {
@@ -120,10 +94,25 @@ public class LocalTestServer {
                 jettyServer.removeLifeCycleListener(listener);
             }
         };
-        neoServer = new NeoServerWithEmbeddedWebServer(bootstrapper, new StartupHealthCheck(), new PropertyFileConfigurator(new File(url.getPath())), jettyWebServer, serverModules) {
+        neoServer = new CommunityNeoServer(new PropertyFileConfigurator(new File(url.getPath()))) {
             @Override
             protected int getWebServerPort() {
                 return port;
+            }
+
+            @Override
+            protected StartupHealthCheck createHealthCheck() {
+                return new StartupHealthCheck();
+            }
+
+            @Override
+            protected WebServer createWebServer() {
+                return jettyWebServer;
+            }
+
+            @Override
+            protected Iterable<ServerModule> createServerModules() {
+                return asList(new RESTApiModule(webServer,database,configurator.configuration()),new ThirdPartyJAXRSModule(webServer,configurator));
             }
         };
         neoServer.start();
