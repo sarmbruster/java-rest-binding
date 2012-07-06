@@ -35,6 +35,7 @@ import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.graphdb.index.RelationshipIndex;
 import org.neo4j.index.lucene.QueryContext;
+import static org.junit.Assert.assertEquals;
 
 public class RestIndexTest extends RestTestBase {
 
@@ -56,6 +57,7 @@ public class RestIndexTest extends RestTestBase {
         Assert.assertEquals("index results", true, hits.hasNext());
         Assert.assertEquals(node(), hits.next());
     }
+
     @Test
     public void testPutNodeIfAbsentIndex() {
         final Node node = nodeIndex().putIfAbsent(node(), "name", "test");
@@ -73,6 +75,15 @@ public class RestIndexTest extends RestTestBase {
         Assert.assertEquals("index results", true, hits.hasNext());
         Assert.assertEquals(node(), hits.next());
     }
+
+    @Test
+    public void testStarQuery() {
+        Node node = node();
+        nodeIndex().add(node, "name", "test");
+        Node res = nodeIndex().query("*:*").getSingle();
+        assertEquals(node,res);
+    }
+
 
     @Test
     public void testNotFoundInNodeIndex() {

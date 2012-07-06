@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.neo4j.graphdb.Path;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.rest.graphdb.RestAPI;
+import org.neo4j.rest.graphdb.RestAPIFacade;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -37,7 +38,7 @@ public class RestPathParserTest {
     @Test
     public void testParseZeroLength() throws Exception {
         String uri = "http://localhost:7470";
-        RestAPI restApi = new RestAPI(uri);
+        RestAPI restApi = new RestAPIFacade(uri).getDirect();
         Map<String,Object> node = MapUtil.map("data", Collections.EMPTY_MAP, "self", uri + "/db/data/node/0");
         Map<String, Object> pathData = MapUtil.map("start", node, "nodes",Collections.singletonList(node),"length", 0, "relationships", Collections.EMPTY_LIST, "end", node);
         System.out.println("pathData = " + pathData);
@@ -49,7 +50,7 @@ public class RestPathParserTest {
     }
     @Test
     public void testParsePath() throws Exception {
-        RestAPI restApi = new RestAPI(URI);
+        RestAPI restApi = new RestAPIFacade(URI).getDirect();
         Map<String,Object> node = node(0);
         Map<String,Object> node2 = node(1);
         Map<String,Object> relationship = relationship(1,0,1);

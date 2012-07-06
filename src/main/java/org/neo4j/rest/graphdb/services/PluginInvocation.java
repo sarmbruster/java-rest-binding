@@ -26,9 +26,9 @@ import java.util.Map;
 
 import javax.ws.rs.PathParam;
 
+
 import org.neo4j.rest.graphdb.RequestResult;
 import org.neo4j.rest.graphdb.RestAPI;
-import org.neo4j.rest.graphdb.RestRequest;
 import org.neo4j.server.plugins.Name;
 
 /**
@@ -48,14 +48,15 @@ public class PluginInvocation implements RemoteInvocationStrategy{
         this.baseUri =  createBaseUri();
     }
 
-     private String createBaseUri() {
+     private String createBaseUri() { // todo from db-info
         return "ext/"+this.targetClass.getSimpleName()+"/graphdb/";
     }
 
     @Override
     public RequestResult invoke(Method method, Object[] args) {
-        RestRequest restRequest = this.restAPI.getRestRequest();
-        return restRequest.get(this.baseUri + getUriSuffix(method), getRequestParams(method, args));
+        final String uri = this.baseUri + getUriSuffix(method);
+        final Map<String, Object> params = getRequestParams(method, args);
+        return this.restAPI.execute(RequestType.POST, uri, params);
     }
 
      private String getUriSuffix(Method method){

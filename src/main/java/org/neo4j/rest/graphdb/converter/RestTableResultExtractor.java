@@ -70,12 +70,6 @@ public class RestTableResultExtractor implements RestResultConverter{
     }
 
     public Map<?, ?> toMap(RequestResult requestResult) {
-	   final String json = entityString(requestResult);
-	    return JsonHelper.jsonToMap(json);
+	    return requestResult.toMap();
 	}
-
-    public String entityString( RequestResult requestResult) {
-        return requestResult.getEntity();
-    }
-
 }

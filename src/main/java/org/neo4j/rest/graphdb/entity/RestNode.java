@@ -52,11 +52,11 @@ public class RestNode extends RestEntity implements Node {
     }    
   
     public Relationship createRelationshipTo( Node toNode, RelationshipType type ) {
-    	 return this.restApi.createRelationship(this,(RestNode)toNode,type,null);
+    	 return this.restApi.createRelationship(this, toNode, type, null);
     }
 
     public Iterable<Relationship> getRelationships() {
-        return restApi.wrapRelationships( restRequest.get( "relationships/all" ) );
+        return restApi.getRelationships(this, "relationships/all");
     }
 
     public Iterable<Relationship> getRelationships( RelationshipType... types ) {
@@ -68,19 +68,19 @@ public class RestNode extends RestEntity implements Node {
             }
             path += type.name();
         }
-        return restApi.wrapRelationships( restRequest.get( path ) );
+        return restApi.getRelationships(this, path);
     }
 
 
     public Iterable<Relationship> getRelationships( Direction direction ) {
-        return restApi.wrapRelationships( restRequest.get( "relationships/" + RestDirection.from( direction ).shortName ) );
+        return restApi.getRelationships(this, "relationships/" + RestDirection.from(direction).shortName);
     }
 
     public Iterable<Relationship> getRelationships( RelationshipType type,
                                                     Direction direction ) {
         String relationshipsKey = RestDirection.from( direction ).longName + "_relationships";
         Object relationship = getStructuralData().get( relationshipsKey );
-        return restApi.wrapRelationships( restRequest.get( relationship + "/" + type.name() ) );
+        return restApi.getRelationships(this, relationship + "/" + type.name());
     }
 
     public Relationship getSingleRelationship( RelationshipType type,

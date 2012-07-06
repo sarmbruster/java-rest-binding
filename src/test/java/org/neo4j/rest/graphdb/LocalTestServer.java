@@ -104,7 +104,20 @@ public class LocalTestServer {
                 super.startJetty();
 
                 startupListener.await();
+                jettyServer.removeLifeCycleListener(startupListener);
                 // System.err.println("jetty is started after notification " + jettyServer.isStarted());
+            }
+
+            @Override
+            public void stop() {
+                final Server jettyServer = getJetty();
+                final JettyStartupListener listener = new JettyStartupListener();
+                jettyServer.getServer().addLifeCycleListener(listener);
+
+                super.stop();
+
+                listener.await();
+                jettyServer.removeLifeCycleListener(listener);
             }
         };
         neoServer = new NeoServerWithEmbeddedWebServer(bootstrapper, new StartupHealthCheck(), new PropertyFileConfigurator(new File(url.getPath())), jettyWebServer, serverModules) {
@@ -187,7 +200,6 @@ public class LocalTestServer {
 
         @Override
         public void lifeCycleStopped(LifeCycle event) {
-            latch.countDown();
         }
     }
 }

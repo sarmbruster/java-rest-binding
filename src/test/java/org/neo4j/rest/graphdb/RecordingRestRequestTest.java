@@ -36,12 +36,12 @@ public class RecordingRestRequestTest {
     public void init(){        
             this.baseUri = "www.test.net";
             this.exeRequest = new ExecutingRestRequest(baseUri);
-            this.recRequest = new RecordingRestRequest(exeRequest, new RestOperations());       
+            this.recRequest = new RecordingRestRequest(new RestOperations(), exeRequest.getUri());
     }
     
     @Test
     public void testCreate() {
-        RecordingRestRequest testRequest = new RecordingRestRequest(exeRequest, new RestOperations());
+        RecordingRestRequest testRequest = new RecordingRestRequest(new RestOperations(), exeRequest.getUri());
         assertEquals(this.baseUri, testRequest.getBaseUri());
         assertEquals(0, testRequest.getRecordedRequests().size());
         

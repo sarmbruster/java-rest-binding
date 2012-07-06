@@ -130,4 +130,3 @@ public class QueryResultBuilder<T> implements QueryResult<T> {
         return result.iterator();
     }
 }
-

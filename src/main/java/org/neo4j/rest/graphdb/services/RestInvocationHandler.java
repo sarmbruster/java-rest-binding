@@ -23,6 +23,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
+
+import org.neo4j.rest.graphdb.ExecutingRestAPI;
 import org.neo4j.rest.graphdb.RequestResult;
 import org.neo4j.rest.graphdb.RestAPI;
 import org.neo4j.rest.graphdb.converter.ResultTypeConverter;
@@ -58,8 +60,8 @@ public class RestInvocationHandler implements InvocationHandler{
         }
         final RequestResult requestResult = invocationStrategy.invoke(method,args);
         final int status = requestResult.getStatus();
-        if (status!=200) throw new RuntimeException(requestResult.getEntity());
-        Object obj = JsonHelper.readJson(requestResult.getEntity());
+        if (status!=200) throw new RuntimeException(requestResult.getText());
+        Object obj = requestResult.toEntity();
         TypeInformation typeInfo = new TypeInformation( method.getGenericReturnType());
         return this.resultTypeConverter.convertToResultType(obj, typeInfo);
 

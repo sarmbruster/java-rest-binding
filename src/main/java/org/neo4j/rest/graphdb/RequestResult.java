@@ -19,6 +19,7 @@
  */
 package org.neo4j.rest.graphdb;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Map;
 
@@ -29,6 +30,7 @@ import org.neo4j.rest.graphdb.batch.RestOperations.RestOperation;
 import org.neo4j.rest.graphdb.util.JsonHelper;
 
 import com.sun.jersey.api.client.ClientResponse;
+import org.neo4j.rest.graphdb.util.StreamJsonHelper;
 
 
 /**
@@ -38,23 +40,35 @@ import com.sun.jersey.api.client.ClientResponse;
 public class RequestResult {
     private final int status;
     private final String location;
-    private final String entity;
+    private ClientResponse response;
+    private String string;
+    private Object entity;
+    private InputStream stream;
     private long batchId;
     private boolean batchResult = false;
 
     
-    RequestResult(int status, String location, String entity) {
+    RequestResult(int status, String location, String string) {
         this.status = status;
         this.location = location;
-        this.entity = entity;
+        this.string = string;
+        this.stream = null;
     }
-    
+
+    RequestResult(int status, String location, InputStream stream, ClientResponse response) {
+        this.status = status;
+        this.location = location;
+        this.response = response;
+        this.entity = null;
+        this.stream = stream;
+    }
+
     RequestResult(long batchId) {
        this(0,null,"");
        this.batchResult = true;
        this.batchId = batchId;
     }
-    
+
     public static RequestResult batchResult(RestOperation restOperation){
         return new RequestResult(restOperation.getBatchId());
     }
@@ -62,9 +76,8 @@ public class RequestResult {
     public static RequestResult extractFrom(ClientResponse clientResponse) {
         final int status = clientResponse.getStatus();
         final URI location = clientResponse.getLocation();
-        final String data = status != Response.Status.NO_CONTENT.getStatusCode() ? clientResponse.getEntity(String.class) : null;
-        clientResponse.close();
-        return new RequestResult(status, uriString(location), data);
+        final InputStream data = status != Response.Status.NO_CONTENT.getStatusCode() ? clientResponse.getEntityInputStream() : null;
+        return new RequestResult(status, uriString(location), data,clientResponse);
     }
 
     private static String uriString(URI location) {
@@ -80,17 +93,20 @@ public class RequestResult {
         return location;
     }
 
-    public String getEntity() {
+    public Object toEntity() {
+        if (entity!=null) return entity;
+        if (stream != null) {
+            entity = StreamJsonHelper.jsonToSingleValue(stream);
+            closeStream();
+        }
+        else {
+            entity = JsonHelper.jsonToSingleValue(string);
+        }
         return entity;
     }
 
-    public Object toEntity() {
-        return JsonHelper.jsonToSingleValue( getEntity() );        
-    }
-
     public Map<?, ?> toMap() {
-        final String json = getEntity();
-        return JsonHelper.jsonToMap(json);
+        return (Map<?, ?>) toEntity();
     }
 
     public boolean statusIs( StatusType status ) {
@@ -112,4 +128,21 @@ public class RequestResult {
     public static RequestResult extractFrom(Map<String, Object> batchResult) {
         return new RequestResult(200, (String) batchResult.get("location"),JsonHelper.createJsonFrom(batchResult.get("body")));
     }
+
+    public String getText() {
+        if (string==null && stream!=null) {
+            string = JsonHelper.readString(stream);
+            closeStream();
+        }
+        return string;
+    }
+
+    private void closeStream() {
+        stream = null;
+        if (response!=null) {
+            response.close();
+            response = null;
+        }
+    }
+
 }

@@ -37,11 +37,9 @@ import org.neo4j.rest.graphdb.RestRequest;
 public class RestIndexManager implements IndexManager {
     public static final String RELATIONSHIP = "relationship";
     public static final String NODE = "node";
-    private RestRequest restRequest;
-    private RestAPI restApi;
+    private final RestAPI restApi;
 
-    public RestIndexManager( RestRequest restRequest, RestAPI restApi ) {
-        this.restRequest = restRequest;
+    public RestIndexManager(RestAPI restApi) {
         this.restApi = restApi;
     }
 
@@ -68,7 +66,7 @@ public class RestIndexManager implements IndexManager {
     	if (!checkIndex(NODE, indexName, null)){    		
     		createIndex(NODE, indexName,  LuceneIndexImplementation.EXACT_CONFIG);
     	}
-        return new RestNodeIndex( restRequest, indexName, restApi );
+        return new RestNodeIndex(indexName, restApi );
     }
 
     public RestIndex<Node> forNodes( String indexName, Map<String, String> config ) {
@@ -76,9 +74,9 @@ public class RestIndexManager implements IndexManager {
     		throw new IllegalArgumentException("No index configuration was provided!");
     	}
     	if (!checkIndex(NODE, indexName, config)){
-    		createIndex(NODE, indexName, config);
+            createIndex(NODE, indexName, config);
     	}    	
-        return new RestNodeIndex( restRequest, indexName, restApi );
+        return new RestNodeIndex(indexName, restApi );
     }
 
     public String[] nodeIndexNames() {
@@ -94,7 +92,7 @@ public class RestIndexManager implements IndexManager {
     	if (!checkIndex(RELATIONSHIP, indexName, null)){    		
     		createIndex(RELATIONSHIP, indexName,  LuceneIndexImplementation.EXACT_CONFIG);
     	}
-        return new RestRelationshipIndex( restRequest, indexName, restApi );
+        return new RestRelationshipIndex(indexName, restApi );
     }
 
     public RelationshipIndex forRelationships( String indexName, Map<String, String> config ) {
@@ -104,14 +102,11 @@ public class RestIndexManager implements IndexManager {
     	if (!checkIndex(RELATIONSHIP, indexName, config)){
     		createIndex(RELATIONSHIP, indexName, config);
     	}    
-        return new RestRelationshipIndex( restRequest, indexName, restApi );
+        return new RestRelationshipIndex(indexName, restApi );
     }
 
     private void createIndex(String type, String indexName, Map<String, String> config) {
-        Map<String,Object> data=new HashMap<String, Object>();
-        data.put("name",indexName);
-        data.put("config",config);
-        restRequest.post("index/" + type, data);
+        restApi.createIndex(type,indexName,config);
     }
 
     public String[] relationshipIndexNames() {

@@ -42,7 +42,9 @@ import org.neo4j.graphdb.traversal.UniquenessFactory;
 import org.neo4j.helpers.Predicate;
 import org.neo4j.kernel.Traversal;
 import org.neo4j.kernel.Uniqueness;
+
 import org.neo4j.rest.graphdb.RequestResult;
+import org.neo4j.rest.graphdb.RestAPI;
 import org.neo4j.rest.graphdb.RestRequest;
 import org.neo4j.rest.graphdb.entity.RestNode;
 
@@ -52,8 +54,10 @@ import org.neo4j.rest.graphdb.entity.RestNode;
  */
 public class RestTraversal implements RestTraversalDescription {
 
-    private static final String FULLPATH = "fullpath";
     private final Map<String, Object> description=new HashMap<String, Object>();
+
+    public RestTraversal() {
+    }
 
     @Override
     public String toString() {
@@ -171,12 +175,7 @@ public class RestTraversal implements RestTraversalDescription {
 
     public Traverser traverse(Node node) {
         final RestNode restNode = (RestNode) node;
-        final RestRequest request = restNode.getRestRequest();       
-        final RequestResult result = request.post("traverse/" + FULLPATH, description);
-        if (result.statusOtherThan(Response.Status.OK)) throw new RuntimeException(String.format("Error executing traversal: %d %s",result.getStatus(), description));
-        final Object col = result.toEntity();
-        if (!(col instanceof Collection)) throw new RuntimeException(String.format("Unexpected traversal result, %s instead of collection", col!=null ? col.getClass() : null));
-        return new RestTraverser((Collection) col,restNode.getRestApi());
+        return restNode.getRestApi().traverse(restNode, description);
     }
 
     public static RestTraversalDescription description() {

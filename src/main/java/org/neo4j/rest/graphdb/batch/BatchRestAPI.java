@@ -20,6 +20,9 @@
 package org.neo4j.rest.graphdb.batch;
 
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.neo4j.graphdb.PropertyContainer;
@@ -27,10 +30,7 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.index.lucene.ValueContext;
-import org.neo4j.rest.graphdb.ExecutingRestRequest;
-import org.neo4j.rest.graphdb.RequestResult;
-import org.neo4j.rest.graphdb.RestAPI;
-import org.neo4j.rest.graphdb.RestRequest;
+import org.neo4j.rest.graphdb.*;
 import org.neo4j.rest.graphdb.converter.RelationshipIterableConverter;
 import org.neo4j.rest.graphdb.converter.RestEntityExtractor;
 import org.neo4j.rest.graphdb.converter.RestEntityPropertyRefresher;
@@ -41,33 +41,36 @@ import org.neo4j.rest.graphdb.entity.RestRelationship;
 import org.neo4j.rest.graphdb.index.IndexInfo;
 import org.neo4j.rest.graphdb.index.RestIndex;
 import org.neo4j.rest.graphdb.index.SimpleIndexHits;
+import org.neo4j.rest.graphdb.services.RequestType;
+import org.neo4j.rest.graphdb.util.JsonHelper;
 
-public class BatchRestAPI extends RestAPI {
+public class BatchRestAPI extends ExecutingRestAPI {
 
-    public BatchRestAPI( String uri ) {
-        super(uri);
+    private final ExecutingRestAPI executingRestApi;
+
+    public BatchRestAPI(String baseUri, RestAPIFacade facade) {
+        super(baseUri,facade);
+        executingRestApi = facade.getDirect();
+        this.restRequest =  new RecordingRestRequest(new RestOperations(), baseUri);
     }
 
-    public BatchRestAPI( String uri, String user, String password ) {       
-        super(uri, user, password); 
+    @Override
+    public RestRequest getRestRequest() {
+        return restRequest;
     }
-    
-    public BatchRestAPI(String uri, ExecutingRestRequest executingRestRequest){
-        super(uri);
-        this.restRequest =  new RecordingRestRequest(executingRestRequest, new RestOperations());
-    }
-    
+
     @Override
     protected RestRequest createRestRequest( String uri, String user, String password){
-        return new RecordingRestRequest(new ExecutingRestRequest(uri,  user,  password),new RestOperations());
+        final ExecutingRestRequest executingRestRequest = new ExecutingRestRequest(uri, user, password);
+        return new RecordingRestRequest(new RestOperations(), executingRestRequest.getUri());
     }
     
     
     @Override
     public RestNode createRestNode(RequestResult requestResult) {
         final long batchId = requestResult.getBatchId();
-        RestNode node = new RestNode("{"+batchId+"}", this);
-        (getRecordingRequest()).getOperations().addToRestOperation(batchId, node, new RestEntityExtractor(this));
+        RestNode node = new RestNode("{"+batchId+"}", facade);
+        (getRecordingRequest()).getOperations().addToRestOperation(batchId, node, new RestEntityExtractor(facade));
         return node;
     }
           
@@ -75,8 +78,8 @@ public class BatchRestAPI extends RestAPI {
     @Override
     public RestRelationship createRestRelationship(RequestResult requestResult, PropertyContainer element) {
         final long batchId = requestResult.getBatchId();
-        RestRelationship relationship = new RestRelationship("{"+batchId+"}", this);
-        getRecordingRequest().getOperations().addToRestOperation(batchId, relationship, new RestEntityExtractor(this));
+        RestRelationship relationship = new RestRelationship("{"+batchId+"}", facade);
+        getRecordingRequest().getOperations().addToRestOperation(batchId, relationship, new RestEntityExtractor(facade));
         return relationship;
     }
 
@@ -96,56 +99,116 @@ public class BatchRestAPI extends RestAPI {
     public Iterable<Relationship> wrapRelationships(  RequestResult requestResult ) {
         final long batchId = requestResult.getBatchId();
         final BatchIterable<Relationship> result = new BatchIterable<Relationship>(requestResult);
-        getRecordingRequest().getOperations().addToRestOperation(batchId, result, new RelationshipIterableConverter(this));
+        getRecordingRequest().getOperations().addToRestOperation(batchId, result, new RelationshipIterableConverter(facade));
         return result;
     }
 
     public <S extends PropertyContainer> IndexHits<S> queryIndex(String indexPath, Class<S> entityType) {
         RequestResult response = restRequest.get(indexPath);
         final long batchId = response.getBatchId();
-        final SimpleIndexHits<S> result = new SimpleIndexHits<S>(batchId, entityType, this);
-        getRecordingRequest().getOperations().addToRestOperation(batchId, result, new RestIndexHitsConverter(this,entityType));
+        final SimpleIndexHits<S> result = new SimpleIndexHits<S>(batchId, entityType, facade);
+        getRecordingRequest().getOperations().addToRestOperation(batchId, result, new RestIndexHitsConverter(facade,entityType));
         return result;
     }    
-   
 
-    public  IndexInfo indexInfo(final String indexType) {
-        return new BatchIndexInfo();
-    }
-     
     @Override
     public void setPropertyOnEntity( RestEntity entity, String key, Object value ) {       
-        RequestResult response = entity.getRestRequest().put( "properties/" + key, value);
+        RequestResult response = getRestRequest().with(entity.getUri()).put("properties/" + key, value);
         final long batchId = response.getBatchId();     
         getRecordingRequest().getOperations().addToRestOperation(batchId, entity, new RestEntityPropertyRefresher(entity));       
     }
     
     @Override
-    public <T> void addToIndex( T entity, RestIndex index,  String key, Object value ) {
+    public <T extends PropertyContainer> void addToIndex( T entity, RestIndex index,  String key, Object value ) {
         final RestEntity restEntity = (RestEntity) entity;
         String uri = restEntity.getUri();
         if (value instanceof ValueContext) {
             value = ((ValueContext)value).getCorrectValue();
         }
         final Map<String, Object> data = MapUtil.map("key", key, "value", value, "uri", uri);
-        final RequestResult result = restRequest.post(index.indexPath(), data);        
+        restRequest.post(index.indexPath(), data);
     }
-    
-    @Override
-    public <T> void removeFromIndex(RestIndex index, T entity) {       
-        throw new UnsupportedOperationException();
+
+    public void executeBatchRequest() {
+        stop();
+        RestOperations operations = getRecordedOperations();
+        RequestResult response = executingRestApi.batch(createBatchRequestData(operations));
+        Map<Long, Object> mappedObjects = convertRequestResultToEntities(operations, response);
+        updateRestOperations(operations, mappedObjects);
     }
-    
-    @Override
-    public <T> void removeFromIndex( RestIndex index, T entity, String key, Object value ) {
-        throw new UnsupportedOperationException();
-    }  
-    
-    @Override
-    public <T> void removeFromIndex(RestIndex index, T entity, String key) {
-        throw new UnsupportedOperationException();
+
+    protected void updateRestOperations(RestOperations operations, Map<Long, Object> mappedObjects) {
+        for (RestOperations.RestOperation operation : operations.getRecordedRequests().values()) {
+            operation.updateEntity(mappedObjects.get(operation.getBatchId()), executingRestApi);
+        }
     }
-         
+
+    @Override
+    protected <T extends PropertyContainer> String indexPath(String indexPath, T entity) {
+        RestEntity restEntity = (RestEntity) entity;
+        if (isNewEntity(restEntity)) throw new UnsupportedOperationException("Cannot delete newly created entities from index " + entity);
+        return super.indexPath(indexPath, restEntity);
+    }
+
+    private boolean isNewEntity(RestEntity restEntity) {
+        return restEntity.getUri().startsWith("{");
+    }
+
+    @SuppressWarnings("unchecked")
+    protected Map<Long, Object> convertRequestResultToEntities(RestOperations operations, RequestResult response) {
+        Object result = response.toEntity();
+        if (RestResultException.isExceptionResult(result)) {
+            throw new RestResultException(result);
+        }
+        Collection<Map<String, Object>> responseCollection = (Collection<Map<String, Object>>) result;
+        Map<Long, Object> mappedObjects = new HashMap<Long, Object>(responseCollection.size());
+        for (Map<String, Object> entry : responseCollection) {
+            final Long batchId = getBatchId(entry);
+            final RequestResult subResult = RequestResult.extractFrom(entry);
+            RestOperations.RestOperation restOperation = operations.getOperation(batchId);
+            if (restOperation.getEntity() != null){
+                Object entity = restOperation.getResultConverter().convertFromRepresentation(subResult);
+                mappedObjects.put(batchId, entity);
+            }
+
+        }
+        return mappedObjects;
+    }
+
+
+    private Long getBatchId(Map<String, Object> entry) {
+        return ((Number) entry.get("id")).longValue();
+    }
+
+    protected Collection<Map<String, Object>> createBatchRequestData(RestOperations operations) {
+        Collection<Map<String, Object>> batch = new ArrayList<Map<String, Object>>();
+        final String baseUri = executingRestApi.getBaseUri();
+        for (RestOperations.RestOperation operation : operations.getRecordedRequests().values()) {
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("method", operation.getMethod());
+            if (operation.isSameUri(baseUri)) {
+                params.put("to", operation.getUri());
+            } else {
+                params.put("to",createOperationUri(operation));
+            }
+            if (operation.getData() != null) {
+                params.put("body", operation.getData());
+            }
+            params.put("id", operation.getBatchId());
+            batch.add(params);
+        }
+        return batch;
+    }
+
+    private String createOperationUri(RestOperations.RestOperation operation){
+        String uri =  operation.getBaseUri();
+        String suffix = operation.getUri();
+        if (suffix.startsWith("/")){
+            return uri + suffix;
+        }
+        return uri + "/" + suffix;
+    }
+
 
     private static class BatchIndexInfo implements IndexInfo {
 

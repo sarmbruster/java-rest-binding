@@ -10,13 +10,13 @@
     <groupId>org.neo4j</groupId>
     <artifactId>neo4j-rest-graphdb</artifactId>
     <packaging>jar</packaging>
-    <version>1.8-SNAPSHOT</version>
+    <version>1.7.2</version>
     <name>Neo4j - Rest GraphDatabaseService Wrapper</name>
     <description>Neo4j REST binding implementing the GraphDatabaseService interface.</description>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <slf4j.version>1.6.1</slf4j.version>
-        <neo4j.version>1.7</neo4j.version>
+        <neo4j.version>1.7.2</neo4j.version>
         <jersey.version>1.4</jersey.version>
         <blueprints.version>1.2</blueprints.version>
         <gremlin.version>1.5</gremlin.version>
@@ -238,12 +238,6 @@ the relevant Commercial Agreement.
             <artifactId>neo4j-lucene-index</artifactId>
             <version>${neo4j.version}</version>
         </dependency> 
-      <!--  <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-core</artifactId>
-            <version>3.0.1</version>
-        </dependency>  -->
-        <!-- Server example dependencies -->
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-server</artifactId>

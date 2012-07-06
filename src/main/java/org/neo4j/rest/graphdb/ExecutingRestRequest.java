@@ -19,7 +19,7 @@
  */
 package org.neo4j.rest.graphdb;
 
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.core.MediaType;
 
+import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.rest.graphdb.util.JsonHelper;
 
 import com.sun.jersey.api.client.Client;
@@ -35,11 +36,15 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
+import org.neo4j.rest.graphdb.util.StreamJsonHelper;
+
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 
 public class ExecutingRestRequest implements RestRequest {
 
     public static final int CONNECT_TIMEOUT = (int) TimeUnit.SECONDS.toMillis(30);
     public static final int READ_TIMEOUT = (int) TimeUnit.SECONDS.toMillis(30);
+    public static final MediaType STREAMING_JSON_TYPE = new MediaType(APPLICATION_JSON_TYPE.getType(),APPLICATION_JSON_TYPE.getSubtype(), MapUtil.stringMap("stream","true"));
     private final String baseUri;
     private final Client client;
 
@@ -64,7 +69,7 @@ public class ExecutingRestRequest implements RestRequest {
 
         client.setConnectTimeout(CONNECT_TIMEOUT);
         client.setReadTimeout(READ_TIMEOUT);
-
+        client.setChunkedEncodingSize(8*1024);
         return client;
     }
 
@@ -90,7 +95,7 @@ public class ExecutingRestRequest implements RestRequest {
 
     private Builder builder( String path ) {
         WebResource resource = client.resource( uri( pathOrAbsolute( path ) ) );
-        return resource.accept( MediaType.APPLICATION_JSON_TYPE );
+        return resource.accept(STREAMING_JSON_TYPE).header("X-Stream","true");
     }
 
     private String pathOrAbsolute( String path ) {
@@ -109,7 +114,7 @@ public class ExecutingRestRequest implements RestRequest {
     public RequestResult get( String path, Object data ) {
         Builder builder = builder(path);
         if ( data != null ) {
-            builder = builder.entity( JsonHelper.createJsonFrom( data ), MediaType.APPLICATION_JSON_TYPE );
+            builder = builder.entity( JsonHelper.createJsonFrom( data ), APPLICATION_JSON_TYPE );
         }
         return RequestResult.extractFrom(builder.get(ClientResponse.class));
     }
@@ -125,17 +130,29 @@ public class ExecutingRestRequest implements RestRequest {
     public RequestResult post( String path, Object data ) {
         Builder builder = builder( path );
         if ( data != null ) {
-            builder = builder.entity( JsonHelper.createJsonFrom( data ), MediaType.APPLICATION_JSON_TYPE );
+            builder = builder.entity( toInputStream(data), APPLICATION_JSON_TYPE );
         }
         return RequestResult.extractFrom(builder.post(ClientResponse.class));
     }
 
-  
+    private InputStream toInputStream(Object data) {
+        try {
+            if (data instanceof InputStream) return (InputStream) data;
+            PipedInputStream inputStream = new PipedInputStream(8 * 1024);
+            PipedOutputStream outputStream = new PipedOutputStream(inputStream);
+            StreamJsonHelper.writeJsonTo(data, outputStream);
+            return inputStream;
+        } catch (IOException e) {
+            throw new RuntimeException("Error writing "+data+" to stream",e);
+        }
+    }
+
+
     @Override
     public RequestResult put( String path, Object data ) {
         Builder builder = builder( path );
         if ( data != null ) {
-            builder = builder.entity( JsonHelper.createJsonFrom( data ), MediaType.APPLICATION_JSON_TYPE );
+            builder = builder.entity( JsonHelper.createJsonFrom( data ), APPLICATION_JSON_TYPE );
         }
         final ClientResponse response = builder.put(ClientResponse.class);
         response.close();
@@ -165,11 +182,6 @@ public class ExecutingRestRequest implements RestRequest {
 
 	@Override
 	public Map<?, ?> toMap(RequestResult requestResult) {	
-	   final String json = entityString(requestResult);
-	    return JsonHelper.jsonToMap(json);	   
+	   return requestResult.toMap();
 	}
-	
-	public String entityString( RequestResult requestResult) {
-        return requestResult.getEntity();
-    }
 }

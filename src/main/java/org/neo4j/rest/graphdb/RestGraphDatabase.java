@@ -20,10 +20,7 @@
 package org.neo4j.rest.graphdb;
 
 
-import org.neo4j.graphdb.DynamicRelationshipType;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.*;
 import org.neo4j.rest.graphdb.index.RestIndexManager;
 import org.neo4j.rest.graphdb.query.RestCypherQueryEngine;
 import org.neo4j.rest.graphdb.transaction.NullTransactionManager;
@@ -44,18 +41,13 @@ public class RestGraphDatabase extends AbstractRemoteDatabase {
     }
     
     public RestGraphDatabase( String uri ) {
-        this( new ExecutingRestRequest( uri ));
+        this( new RestAPIFacade( uri ));
     }
 
     public RestGraphDatabase( String uri, String user, String password ) {
-        this(new ExecutingRestRequest( uri, user, password ));
+        this(new RestAPIFacade( uri, user, password ));
     }
-    
-    public RestGraphDatabase( RestRequest restRequest){
-    	this(new RestAPI(restRequest));
-    } 
-    
-    
+
     public RestAPI getRestAPI(){
     	return this.restAPI;
     }
@@ -95,24 +87,24 @@ public class RestGraphDatabase extends AbstractRemoteDatabase {
     public Relationship getRelationshipById( long id ) {
     	return this.restAPI.getRelationshipById(id);
     }    
-
-  
-    public RestRequest getRestRequest() {
-        return this.restAPI.getRestRequest();
-    }
-
-    public long getPropertyRefetchTimeInMillis() {
-        return this.restAPI.getPropertyRefetchTimeInMillis();
-	}
-
     @Override
     public String getStoreDir() {
-        return restAPI.getStoreDir();
+        return restAPI.getBaseUri();
     }
 
     @Override
     public TransactionManager getTxManager() {
-        return new NullTransactionManager();
+        return new BatchTransactionManager(restAPI); //new NullTransactionManager();
+    }
+
+    @Override
+    public Transaction beginTx() {
+        return restAPI.beginTx();
+    }
+
+    @Override
+    public void shutdown() {
+        restAPI.close();
     }
 }
 

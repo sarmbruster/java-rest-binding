@@ -27,30 +27,25 @@ import java.util.Map;
 import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.helpers.collection.IterableWrapper;
-import org.neo4j.rest.graphdb.PropertiesMap;
-import org.neo4j.rest.graphdb.RestAPI;
-import org.neo4j.rest.graphdb.RestGraphDatabase;
-import org.neo4j.rest.graphdb.RestRequest;
-import org.neo4j.rest.graphdb.UpdatableRestResult;
+import org.neo4j.rest.graphdb.*;
 import org.neo4j.rest.graphdb.util.ArrayConverter;
 
 public class RestEntity implements PropertyContainer, UpdatableRestResult<RestEntity> {
     private Map<?, ?> structuralData;
     private Map<String, Object> propertyData;
     private long lastTimeFetchedPropertyData;
-    protected RestAPI restApi;    
-   
-   
-	protected RestRequest restRequest;
+    protected RestAPI restApi;
+
     private final ArrayConverter arrayConverter=new ArrayConverter();
+    private String uri;
 
     public RestEntity( URI uri, RestAPI restApi ) {
         this( uri.toString(), restApi );
     }    
 
-    public RestEntity( String uri, RestAPI restApi ) {     
-        this.restRequest = restApi.getRestRequest().with( uri );        
-        this.restApi = restApi;       
+    public RestEntity( String uri, RestAPI restApi ) {
+        this.uri = uri;
+        this.restApi = restApi;
     }      
 
     public RestEntity( Map<?, ?> data, RestAPI restApi ) {
@@ -58,20 +53,18 @@ public class RestEntity implements PropertyContainer, UpdatableRestResult<RestEn
         this.restApi = restApi;
         this.propertyData = (Map<String, Object>) data.get( "data" );
         this.lastTimeFetchedPropertyData = System.currentTimeMillis();
-        String uri = (String) data.get( "self" );
-        this.restRequest = restApi.getRestRequest().with( uri );
+        this.uri = (String) data.get( "self" );
     }
 
     public String getUri() {       
-        return this.restRequest.getUri();
+        return uri;
     }
     
-    public void updateFrom(RestEntity updateEntity, RestAPI restApi){  
+    public void updateFrom(RestEntity updateEntity, RestAPI restApi){
         if (this == updateEntity){            
             this.lastTimeFetchedPropertyData = 0;
         }
-        this.restApi = restApi;
-        this.restRequest = restApi.getRestRequest().with(updateEntity.getUri());
+        this.uri = updateEntity.getUri();
         this.structuralData = updateEntity.getStructuralData();
         this.propertyData = updateEntity.getPropertyData();    
         this.lastTimeFetchedPropertyData = System.currentTimeMillis();
@@ -79,7 +72,7 @@ public class RestEntity implements PropertyContainer, UpdatableRestResult<RestEn
 
     Map<?, ?> getStructuralData() {
         if ( this.structuralData == null ) {
-            this.structuralData = restRequest.get( "" ) .toMap();
+            this.structuralData = restApi.getData(this);
         }
         return this.structuralData;
     }    
@@ -93,12 +86,10 @@ public class RestEntity implements PropertyContainer, UpdatableRestResult<RestEn
     }
 
     private boolean hasToUpdateProperties() {
-        return this.propertyData == null || timeElapsed( this.lastTimeFetchedPropertyData, restApi.getPropertyRefetchTimeInMillis() );
+        if (this.propertyData == null) return true;
+        return restApi.hasToUpdate(this.lastTimeFetchedPropertyData);
     }
 
-    private boolean timeElapsed( long since, long isItGreaterThanThis ) {       
-        return System.currentTimeMillis() - since > isItGreaterThanThis;
-    }
 
     public Object getProperty( String key ) {
         Object value = getPropertyValue(key);
@@ -150,8 +141,7 @@ public class RestEntity implements PropertyContainer, UpdatableRestResult<RestEn
 
     public Object removeProperty( String key ) {
         Object value = getProperty( key, null );
-        restRequest.delete("properties/" + key);
-        invalidatePropertyData();
+        restApi.removeProperty(this, key);
         return value;
     }
 
@@ -189,10 +179,6 @@ public class RestEntity implements PropertyContainer, UpdatableRestResult<RestEn
        
     public RestGraphDatabase getGraphDatabase() {
     	 return new RestGraphDatabase(restApi);
-    }
-
-    public RestRequest getRestRequest() {
-        return restRequest;
     }
 
     @Override
