@@ -19,6 +19,7 @@
  */
 package org.neo4j.rest.graphdb;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Map;
@@ -76,8 +77,18 @@ public class RequestResult {
     public static RequestResult extractFrom(ClientResponse clientResponse) {
         final int status = clientResponse.getStatus();
         final URI location = clientResponse.getLocation();
-        final InputStream data = status != Response.Status.NO_CONTENT.getStatusCode() ? clientResponse.getEntityInputStream() : null;
-        return new RequestResult(status, uriString(location), data,clientResponse);
+        // final InputStream data;
+        if (status == Response.Status.NO_CONTENT.getStatusCode()) {
+        //    data = null;
+            clientResponse.close();
+            return new RequestResult(status, uriString(location), null,clientResponse);
+        } else {
+        //    data = clientResponse.getEntityInputStream();
+            RequestResult result = new RequestResult(status, uriString(location), clientResponse.getEntity(String.class));
+            clientResponse.close();
+            return result;
+        }
+        //return new RequestResult(status, uriString(location), data,clientResponse);
     }
 
     private static String uriString(URI location) {
@@ -138,6 +149,7 @@ public class RequestResult {
     }
 
     private void closeStream() {
+        if (stream!=null) readFully(stream);
         stream = null;
         if (response!=null) {
             response.close();
@@ -145,4 +157,11 @@ public class RequestResult {
         }
     }
 
+    private void readFully(InputStream stream) {
+        try {
+            while (stream.read()!=-1);
+        } catch (IOException e) {
+            // ignore
+        }
+    }
 }

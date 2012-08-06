@@ -66,7 +66,6 @@ public class ExecutingRestRequest implements RestRequest {
 
     protected Client createClient() {
         Client client = Client.create();
-
         client.setConnectTimeout(CONNECT_TIMEOUT);
         client.setReadTimeout(READ_TIMEOUT);
         client.setChunkedEncodingSize(8*1024);

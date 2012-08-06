@@ -25,6 +25,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.server.CommunityNeoServer;
 import org.neo4j.server.configuration.PropertyFileConfigurator;
 import org.neo4j.server.database.Database;
+import org.neo4j.server.database.WrappingDatabase;
 import org.neo4j.server.modules.RESTApiModule;
 import org.neo4j.server.modules.ServerModule;
 import org.neo4j.server.modules.ThirdPartyJAXRSModule;
@@ -98,6 +99,11 @@ public class LocalTestServer {
             @Override
             protected int getWebServerPort() {
                 return port;
+            }
+
+            @Override
+            protected Database createDatabase() {
+                return new WrappingDatabase(graphDatabase);
             }
 
             @Override
