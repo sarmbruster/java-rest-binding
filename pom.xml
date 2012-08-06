@@ -10,7 +10,7 @@
     <groupId>org.neo4j</groupId>
     <artifactId>neo4j-rest-graphdb</artifactId>
     <packaging>jar</packaging>
-    <version>1.8-SNAPSHOT</version>
+    <version>1.8.M06</version>
     <name>Neo4j - Rest GraphDatabaseService Wrapper</name>
     <description>Neo4j REST binding implementing the GraphDatabaseService interface.</description>
     <properties>
@@ -273,6 +273,13 @@ the relevant Commercial Agreement.
     </dependencies>
     <build>
         <plugins>
+	      <plugin>
+	        <groupId>org.apache.maven.plugins</groupId>
+	        <artifactId>maven-gpg-plugin</artifactId>
+	        <configuration>
+	          <skip>true</skip>
+	        </configuration>
+	      </plugin>
             <plugin>
               <artifactId>maven-site-plugin</artifactId>
               <configuration>
