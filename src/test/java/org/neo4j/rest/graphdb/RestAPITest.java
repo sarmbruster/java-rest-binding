@@ -49,8 +49,14 @@ public class RestAPITest extends RestTestBase {
 	public void init(){
 		this.restAPI = ((RestGraphDatabase)getRestGraphDb()).getRestAPI();
 	}
-	
-	@Test
+
+    @Test
+    public void testUserAgent() throws Exception {
+        restAPI.createNode(map());
+        assertTrue(getUserAgent().matches("neo4j-rest-graphdb/[\\d.]+"));
+    }
+
+    @Test
     public void testCreateNodeWithParams() {
 		Map<String, Object> props = new HashMap<String, Object>();
 		props.put("name", "test");

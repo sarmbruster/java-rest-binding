@@ -34,6 +34,8 @@ import org.neo4j.tooling.GlobalGraphOperations;
 import java.net.URISyntaxException;
 import java.util.Iterator;
 
+import static org.junit.Assert.assertEquals;
+
 public class RestTestBase {
 
     private GraphDatabaseService restGraphDb;
@@ -48,6 +50,22 @@ public class RestTestBase {
     @BeforeClass
     public static void startDb() throws Exception {
         neoServer.start();
+        tryConnect();
+    }
+
+    private static void tryConnect() throws InterruptedException {
+        int retryCount = 3;
+        for (int i = 0; i < retryCount; i++) {
+            try {
+                RequestResult result = new ExecutingRestRequest(SERVER_ROOT_URI).get("");
+                assertEquals(200, result.getStatus());
+                System.err.println("Successful HTTP connection to "+SERVER_ROOT_URI);
+                return;
+            } catch (Exception e) {
+                System.err.println("Error retrieving ROOT URI " + e.getMessage());
+                Thread.sleep(500);
+            }
+        }
     }
 
     @Before
@@ -91,5 +109,8 @@ public class RestTestBase {
 
     protected Node loadRealNode(Node node) {
         return getGraphDatabase().getNodeById(node.getId());
+    }
+    public String getUserAgent() {
+        return neoServer.getUserAgent();
     }
 }

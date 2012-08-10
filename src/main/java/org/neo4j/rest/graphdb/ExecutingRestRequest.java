@@ -24,6 +24,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.core.MediaType;
@@ -46,6 +47,7 @@ public class ExecutingRestRequest implements RestRequest {
     public static final int READ_TIMEOUT = (int) TimeUnit.SECONDS.toMillis(30);
     public static final MediaType STREAMING_JSON_TYPE = new MediaType(APPLICATION_JSON_TYPE.getType(),APPLICATION_JSON_TYPE.getSubtype(), MapUtil.stringMap("stream","true"));
     private final String baseUri;
+    private final UserAgent userAgent = new UserAgent();
     private final Client client;
 
     public ExecutingRestRequest( String baseUri ) {
@@ -59,6 +61,9 @@ public class ExecutingRestRequest implements RestRequest {
 
     }
 
+    public void setUserAgent(String newValue) {
+        userAgent.setUserAgent(newValue);
+    }
     protected void addAuthFilter(String username, String password) {
         if (username == null) return;
         client.addFilter( new HTTPBasicAuthFilter( username, password ) );
@@ -69,6 +74,7 @@ public class ExecutingRestRequest implements RestRequest {
         client.setConnectTimeout(CONNECT_TIMEOUT);
         client.setReadTimeout(READ_TIMEOUT);
         client.setChunkedEncodingSize(8*1024);
+        userAgent.install(client);
         return client;
     }
 
@@ -78,8 +84,7 @@ public class ExecutingRestRequest implements RestRequest {
     }
 
     protected String uriWithoutSlash( String uri ) {
-        String uriString = uri;
-        return  (uriString.endsWith( "/" ) ?  uriString.substring( 0, uriString.length() - 1 )  : uri);
+        return  (uri.endsWith("/") ?  uri.substring(0, uri.length() - 1)  : uri);
     }
 
     public static String encode( Object value ) {

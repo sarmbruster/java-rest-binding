@@ -34,7 +34,10 @@ import org.neo4j.server.web.Jetty6WebServer;
 import org.neo4j.server.web.WebServer;
 import org.neo4j.test.ImpermanentGraphDatabase;
 
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.util.concurrent.CountDownLatch;
@@ -52,6 +55,7 @@ public class LocalTestServer {
     private final String hostname;
     protected String propertiesFile = "test-db.properties";
     private final ImpermanentGraphDatabase graphDatabase;
+    private String userAgent;
 
     public LocalTestServer() {
         this("localhost",7473);
@@ -67,7 +71,7 @@ public class LocalTestServer {
         if (neoServer!=null) throw new IllegalStateException("Server already running");
         URL url = getClass().getResource("/" + propertiesFile);
         if (url==null) throw new IllegalArgumentException("Could not resolve properties file "+propertiesFile);
-        final Jetty6WebServer jettyWebServer = new Jetty6WebServer() {
+        final Jetty6WebServer jettyWebServer = new Jetty6WebServer(); /* {
             @Override
             protected void startJetty() {
                 final Server jettyServer = getJetty();
@@ -82,7 +86,6 @@ public class LocalTestServer {
                 jettyServer.removeLifeCycleListener(startupListener);
                 // System.err.println("jetty is started after notification " + jettyServer.isStarted());
             }
-
             @Override
             public void stop() {
                 final Server jettyServer = getJetty();
@@ -94,7 +97,17 @@ public class LocalTestServer {
                 listener.await();
                 jettyServer.removeLifeCycleListener(listener);
             }
-        };
+        }; */
+        jettyWebServer.addFilter(new Filter() {
+            public void init(FilterConfig filterConfig) throws ServletException { }
+
+            public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+                userAgent = ((HttpServletRequest)request).getHeader("User-Agent");
+                filterChain.doFilter(request, response);
+            }
+
+            public void destroy() { }
+        },"/*");
         neoServer = new CommunityNeoServer(new PropertyFileConfigurator(new File(url.getPath()))) {
             @Override
             protected int getWebServerPort() {
@@ -122,6 +135,11 @@ public class LocalTestServer {
             }
         };
         neoServer.start();
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void stop() {
@@ -162,6 +180,10 @@ public class LocalTestServer {
         return getDatabase().graph;
     }
 
+    public String getUserAgent() {
+        return userAgent;
+    }
+
     private static class JettyStartupListener implements LifeCycle.Listener {
         CountDownLatch latch=new CountDownLatch(1);
         public void await() {
@@ -175,26 +197,31 @@ public class LocalTestServer {
 
         @Override
         public void lifeCycleStarting(LifeCycle event) {
+            System.err.println("STARTING");
         }
 
         @Override
         public void lifeCycleStarted(LifeCycle event) {
+            System.err.println("STARTED");
             latch.countDown();
         }
 
         @Override
         public void lifeCycleFailure(LifeCycle event, Throwable cause) {
+            System.err.println("FAILURE "+cause.getMessage());
             latch.countDown();
             throw new RuntimeException(cause);
         }
 
         @Override
         public void lifeCycleStopping(LifeCycle event) {
-
+            System.err.println("STOPPING");
         }
 
         @Override
         public void lifeCycleStopped(LifeCycle event) {
+            System.err.println("STOPPED");
+            latch.countDown();
         }
     }
 }
