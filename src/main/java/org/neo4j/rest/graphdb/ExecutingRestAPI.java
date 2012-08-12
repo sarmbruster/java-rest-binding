@@ -181,6 +181,33 @@ public class ExecutingRestAPI implements RestAPI {
     public void close() {
     }
 
+    @Override
+    public boolean isAutoIndexingEnabled(Class<? extends PropertyContainer> clazz) {
+        RequestResult response = getRestRequest().get(buildPathAutoIndexerStatus(clazz));
+        if (response.statusIs(Response.Status.OK)) {
+            return Boolean.parseBoolean(response.getText());
+        } else {
+            throw new IllegalStateException("received " + response);
+        }
+    }
+
+    @Override
+    public void setAutoIndexingEnabled(Class<? extends PropertyContainer> clazz, boolean enabled) {
+        RequestResult response = getRestRequest().put(buildPathAutoIndexerStatus(clazz), enabled);
+        if (response.statusOtherThan(Status.NO_CONTENT)) {
+            throw new IllegalStateException("received " + response);
+        }
+    }
+
+    private String buildPathAutoIndexerStatus(Class<? extends PropertyContainer> clazz) {
+        return buildPathAutoIndexerBase(clazz).append("/status").toString();
+    }
+
+    private StringBuilder buildPathAutoIndexerBase(Class<? extends PropertyContainer> clazz) {
+        return new StringBuilder().append("index/auto/").append(clazz.getSimpleName().toLowerCase());
+    }
+
+
     public RestRequest getRestRequest() {
         final BatchRestAPI restAPI = current();
         return restAPI == null ? restRequest : restAPI.getRestRequest();

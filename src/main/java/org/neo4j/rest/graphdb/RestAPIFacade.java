@@ -255,6 +255,16 @@ public class RestAPIFacade implements RestAPI {
         BatchTransaction.shutdown();
     }
 
+    @Override
+    public boolean isAutoIndexingEnabled(Class<? extends PropertyContainer> clazz) {
+        return current().isAutoIndexingEnabled(clazz);
+    }
+
+    @Override
+    public void setAutoIndexingEnabled(Class<? extends PropertyContainer> clazz, boolean enabled) {
+        current().setAutoIndexingEnabled(clazz, enabled);
+    }
+
     private final ExecutingRestAPI direct;
 
     private RestAPIFacade(ExecutingRestAPI direct) {

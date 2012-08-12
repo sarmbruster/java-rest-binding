@@ -130,4 +130,8 @@ public interface RestAPI {
     RequestResult execute(RequestType requestType, String uri, Object params);
 
     void close();
+
+    boolean isAutoIndexingEnabled(Class<? extends PropertyContainer> clazz);
+
+    void setAutoIndexingEnabled(Class<? extends PropertyContainer> clazz, boolean enabled);
 }
