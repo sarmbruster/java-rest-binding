@@ -36,6 +36,7 @@ import org.neo4j.rest.graphdb.util.QueryResult;
 import org.neo4j.rest.graphdb.util.ResultConverter;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author mh
@@ -134,4 +135,10 @@ public interface RestAPI {
     boolean isAutoIndexingEnabled(Class<? extends PropertyContainer> clazz);
 
     void setAutoIndexingEnabled(Class<? extends PropertyContainer> clazz, boolean enabled);
+
+    Set<String> getAutoIndexedProperties(Class forClass);
+
+    void startAutoIndexingProperty(Class forClass, String s);
+
+    void stopAutoIndexingProperty(Class forClass, String s);
 }

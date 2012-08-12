@@ -52,21 +52,21 @@ public class RestAutoIndexer<T extends PropertyContainer> implements AutoIndexer
 
     @Override
     public ReadableIndex<T> getAutoIndex() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void startAutoIndexingProperty(String s) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        restApi.startAutoIndexingProperty(forClass, s);
     }
 
     @Override
     public void stopAutoIndexingProperty(String s) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        restApi.stopAutoIndexingProperty(forClass, s);
     }
 
     @Override
     public Set<String> getAutoIndexedProperties() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return restApi.getAutoIndexedProperties(forClass);
     }
 }
