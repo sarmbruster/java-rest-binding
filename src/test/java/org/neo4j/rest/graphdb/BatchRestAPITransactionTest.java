@@ -27,8 +27,11 @@ import org.neo4j.graphdb.*;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.index.IndexManager;
+import org.neo4j.helpers.collection.MapUtil;
+import org.neo4j.index.impl.lucene.LuceneIndexImplementation;
 import org.neo4j.rest.graphdb.entity.RestNode;
 import org.neo4j.rest.graphdb.entity.RestRelationship;
+import org.neo4j.rest.graphdb.index.RestIndex;
 import org.neo4j.rest.graphdb.util.TestHelper;
 
 import static org.junit.Assert.*;
@@ -72,6 +75,46 @@ public class BatchRestAPITransactionTest extends RestTestBase {
         tx.finish();
         assertEquals("foo", relationship.getType().name());
         assertEquals("foo", getGraphDatabase().getRelationshipById(relationship.getId()).getType().name());
+    }
+
+    @Test
+    public void testCreateNodeAndAddToIndex() throws Exception {
+        RestIndex<Node> index = restAPI.createIndex(Node.class, "index", LuceneIndexImplementation.FULLTEXT_CONFIG);
+        final Transaction tx = restAPI.beginTx();
+
+        Node n1 = restAPI.createNode(map());
+        index.add(n1,"key","value");
+
+        tx.success();
+        tx.finish();
+        Node node = index.get("key", "value").getSingle();
+        assertEquals("created node found in index",n1,node);
+    }
+
+    @Test(expected = RestResultException.class)
+    public void testFailingDoubleDelete() throws Exception {
+        final Transaction tx = restAPI.beginTx();
+
+        Node n1 = restAPI.createNode(map());
+        n1.delete();
+        n1.delete();
+
+        tx.success();
+        tx.finish();
+    }
+
+    @Test(expected = RestResultException.class)
+    public void testFailingCreateNodeAndAddToIndex() throws Exception {
+        RestIndex<Node> index = restAPI.createIndex(Node.class, "index", MapUtil.stringMap(IndexManager.PROVIDER, "lucene", "type", "fulltext_ _"));
+        final Transaction tx = restAPI.beginTx();
+
+        Node n1 = restAPI.createNode(map());
+        index.add(n1, "key", "value");
+
+        tx.success();
+        tx.finish();
+        Node node = index.get("key", "value").getSingle();
+        assertEquals("created node found in index",n1,node);
     }
 
     @Test

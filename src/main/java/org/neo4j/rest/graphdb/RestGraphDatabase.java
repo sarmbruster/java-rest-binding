@@ -51,8 +51,7 @@ public class RestGraphDatabase extends AbstractRemoteDatabase {
     public RestAPI getRestAPI(){
     	return this.restAPI;
     }
-    
-    
+
     public RestIndexManager index() {
        return this.restAPI.index();
     }

@@ -24,7 +24,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.core.MediaType;
@@ -43,8 +42,16 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 
 public class ExecutingRestRequest implements RestRequest {
 
-    public static final int CONNECT_TIMEOUT = (int) TimeUnit.SECONDS.toMillis(30);
-    public static final int READ_TIMEOUT = (int) TimeUnit.SECONDS.toMillis(30);
+    public final static String CONFIG_PREFIX = "org.neo4j.rest.";
+
+    public static final int CONNECT_TIMEOUT = getTimeout("connect_timeout", 30);
+    public static final int READ_TIMEOUT = getTimeout("read_timeout", 30);
+    public static final boolean STREAM_ENABLED = Boolean.parseBoolean(System.getProperty(CONFIG_PREFIX+"stream","true"));
+
+    private static int getTimeout(final String param, final int defaultValue) {
+        return (int) TimeUnit.SECONDS.toMillis(Integer.parseInt(System.getProperty(CONFIG_PREFIX + param, "" + defaultValue)));
+    }
+
     public static final MediaType STREAMING_JSON_TYPE = new MediaType(APPLICATION_JSON_TYPE.getType(),APPLICATION_JSON_TYPE.getSubtype(), MapUtil.stringMap("stream","true"));
     private final String baseUri;
     private final UserAgent userAgent = new UserAgent();
@@ -61,9 +68,6 @@ public class ExecutingRestRequest implements RestRequest {
 
     }
 
-    public void setUserAgent(String newValue) {
-        userAgent.setUserAgent(newValue);
-    }
     protected void addAuthFilter(String username, String password) {
         if (username == null) return;
         client.addFilter( new HTTPBasicAuthFilter( username, password ) );
@@ -99,7 +103,8 @@ public class ExecutingRestRequest implements RestRequest {
 
     private Builder builder( String path ) {
         WebResource resource = client.resource( uri( pathOrAbsolute( path ) ) );
-        return resource.accept(STREAMING_JSON_TYPE).header("X-Stream","true");
+        if (STREAM_ENABLED) return resource.accept(STREAMING_JSON_TYPE).header("X-Stream","true");
+        return resource.accept(APPLICATION_JSON_TYPE);
     }
 
     private String pathOrAbsolute( String path ) {
@@ -162,7 +167,7 @@ public class ExecutingRestRequest implements RestRequest {
 
     @Override
     public RestRequest with( String uri ) {
-        return new ExecutingRestRequest(  uri , client );
+        return new ExecutingRestRequest(uri, client);
     }
 
     private URI uri( String uri ) {

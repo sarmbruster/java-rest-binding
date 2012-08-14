@@ -163,6 +163,9 @@ public class BatchRestAPI extends ExecutingRestAPI {
         Collection<Map<String, Object>> responseCollection = (Collection<Map<String, Object>>) result;
         Map<Long, Object> mappedObjects = new HashMap<Long, Object>(responseCollection.size());
         for (Map<String, Object> entry : responseCollection) {
+            if (RestResultException.isExceptionResult(entry)) {
+                throw new RestResultException(entry);
+            }
             final Long batchId = getBatchId(entry);
             final RequestResult subResult = RequestResult.extractFrom(entry);
             RestOperations.RestOperation restOperation = operations.getOperation(batchId);

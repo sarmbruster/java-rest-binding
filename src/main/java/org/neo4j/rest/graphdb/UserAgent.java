@@ -33,11 +33,17 @@ import com.sun.jersey.api.client.filter.ClientFilter;
  * @since 10.08.12
  */
 public class UserAgent {
-    private String userAgent = determineUserAgent();
+    public static final String NEO4J_DRIVER_PROPERTY = "org.neo4j.rest.driver";
+
+    private final String userAgent = determineUserAgent();
 
     private String determineUserAgent() {
-        final Properties props = loadPomProperties();
-        return String.format("%s/%s",props.getProperty("artifactId","neo4j-rest-graphdb"),props.getProperty("version","0"));
+        String property = System.getProperty(NEO4J_DRIVER_PROPERTY);
+        if (property == null || property.trim().isEmpty()) {
+            final Properties props = loadPomProperties();
+            return String.format("%s/%s", props.getProperty("artifactId", "neo4j-rest-graphdb"), props.getProperty("version", "0"));
+        }
+        return property;
     }
 
     private Properties loadPomProperties() {
@@ -62,9 +68,5 @@ public class UserAgent {
                 return getNext().handle(cr);
             }
         });
-    }
-
-    public void setUserAgent(String newValue) {
-        this.userAgent=newValue;
     }
 }

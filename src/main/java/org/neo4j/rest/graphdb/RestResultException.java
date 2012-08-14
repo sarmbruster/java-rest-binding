@@ -38,12 +38,18 @@ public class RestResultException extends RuntimeException {
                 sb.append("   ").append(line).append("\n");
             }
         }
+        if (result.containsKey("body")) sb.append(format(toMap(result.get("body"))));
         return sb.toString();
     }
 
     public static boolean isExceptionResult(Object result) {
         final Map<String, Object> map = toMap(result);
-        return map!=null && map.containsKey("exception") && map.containsKey("message");
+        return map!=null && (hasErrorStatus(map) || map.containsKey("exception") || map.containsKey("message") || isExceptionResult(map.get("body")));
+    }
+
+    private static boolean hasErrorStatus(Map<String, Object> map) {
+        Object status = map.get("status");
+        return status != null && !status.toString().startsWith("2");
     }
 
     private static Map<String, Object> toMap(Object result) {

@@ -59,3 +59,15 @@ References / Community:
  * [Neo4j REST API](http://docs.neo4j.org/chunked/milestone/rest-api.html)
  * [Neo4j Docs](http://docs.neo4j.org)
  * [Neo4j Mailing List](http://neo4j.org/forums)
+
+
+Configuration (System-Properties)
+-------------
+
+_timeouts in seconds_
+
+* org.neo4j.rest.read_timeout=30
+* org.neo4j.rest.connect_timeout=30
+* org.neo4j.rest.driver="neo4j-rest-graphdb/1.8M07"
+* org.neo4j.rest.stream=true
+

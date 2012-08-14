@@ -55,6 +55,13 @@ public class RestAPITest extends RestTestBase {
         restAPI.createNode(map());
         assertTrue(getUserAgent().matches("neo4j-rest-graphdb/[\\d.]+"));
     }
+    @Test
+    public void testOverrideUserAgent() throws Exception {
+        System.setProperty(UserAgent.NEO4J_DRIVER_PROPERTY,"foo/bar");
+        new RestAPIFacade(restAPI.getBaseUri()).createNode(map());
+        assertTrue(getUserAgent().matches("foo/bar"));
+        System.setProperty(UserAgent.NEO4J_DRIVER_PROPERTY,"");
+    }
 
     @Test
     public void testCreateNodeWithParams() {

@@ -81,7 +81,7 @@ public class ExecutingRestAPI implements RestAPI {
 
     @Override
     public RestIndexManager index() {
-        return new RestIndexManager(this);
+        return new RestIndexManager(facade);
     }
 
     @Override
