@@ -72,7 +72,7 @@ public class RestPathParser implements RestResultConverter {
     private Path parseFullPath(Map path, final RestAPI restApi) {
         final Collection<Map<?, ?>> nodesData = (Collection<Map<?, ?>>) path.get("nodes");
         final Collection<Map<?, ?>> relationshipsData = (Collection<Map<?, ?>>) path.get("relationships");
-        final Map<?, ?> lastRelationshipData = lastElement(relationshipsData);
+        final Map<?, ?> lastRelationshipData = lastElementMap(relationshipsData);
         final Map<?, ?> startData = (Map<?, ?>) path.get("start");
         final Map<?, ?> endData = (Map<?, ?>) path.get("end");
         final Integer length = (Integer) path.get("length");
@@ -128,7 +128,7 @@ public class RestPathParser implements RestResultConverter {
        return IteratorUtil.lastOrNull(collection);
     }
 
-    private Map<?, ?> lastElement(Collection<Map<?, ?>> collection) {
+    private Map<?, ?> lastElementMap(Collection<Map<?, ?>> collection) {
         if (collection.isEmpty()) return null;
         if (collection instanceof List) {
             List<Map<?,?>> list = (List<Map<?,?>>) collection;
