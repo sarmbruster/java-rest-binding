@@ -32,6 +32,8 @@ import org.neo4j.index.impl.lucene.LuceneIndexImplementation;
 import org.neo4j.rest.graphdb.entity.RestNode;
 import org.neo4j.rest.graphdb.entity.RestRelationship;
 import org.neo4j.rest.graphdb.index.RestIndex;
+import org.neo4j.rest.graphdb.transaction.NullTransaction;
+import org.neo4j.rest.graphdb.util.Config;
 import org.neo4j.rest.graphdb.util.TestHelper;
 
 import static org.junit.Assert.*;
@@ -44,7 +46,23 @@ public class BatchRestAPITransactionTest extends RestTestBase {
 
     @Before
     public void init() {
+        System.setProperty(Config.CONFIG_BATCH_TRANSACTION,"true");
         this.restAPI = ((RestGraphDatabase) getRestGraphDb()).getRestAPI();
+    }
+
+    @Test
+    public void testDisableBatchTransactions() throws Exception {
+        System.setProperty(Config.CONFIG_BATCH_TRANSACTION,"false");
+        Transaction tx = restAPI.beginTx();
+        tx.failure();tx.finish();
+        assertTrue(tx instanceof NullTransaction);
+    }
+    @Test
+    public void testEnableBatchTransactions() throws Exception {
+        System.setProperty(Config.CONFIG_BATCH_TRANSACTION,"true");
+        Transaction tx = restAPI.beginTx();
+        tx.failure();tx.finish();
+        assertTrue(tx instanceof BatchTransaction);
     }
 
     @Test

@@ -24,11 +24,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.core.MediaType;
 
 import org.neo4j.helpers.collection.MapUtil;
+import org.neo4j.rest.graphdb.util.Config;
 import org.neo4j.rest.graphdb.util.JsonHelper;
 
 import com.sun.jersey.api.client.Client;
@@ -41,16 +41,6 @@ import org.neo4j.rest.graphdb.util.StreamJsonHelper;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 
 public class ExecutingRestRequest implements RestRequest {
-
-    public final static String CONFIG_PREFIX = "org.neo4j.rest.";
-
-    public static final int CONNECT_TIMEOUT = getTimeout("connect_timeout", 30);
-    public static final int READ_TIMEOUT = getTimeout("read_timeout", 30);
-    public static final boolean STREAM_ENABLED = Boolean.parseBoolean(System.getProperty(CONFIG_PREFIX+"stream","true"));
-
-    private static int getTimeout(final String param, final int defaultValue) {
-        return (int) TimeUnit.SECONDS.toMillis(Integer.parseInt(System.getProperty(CONFIG_PREFIX + param, "" + defaultValue)));
-    }
 
     public static final MediaType STREAMING_JSON_TYPE = new MediaType(APPLICATION_JSON_TYPE.getType(),APPLICATION_JSON_TYPE.getSubtype(), MapUtil.stringMap("stream","true"));
     private final String baseUri;
@@ -75,8 +65,8 @@ public class ExecutingRestRequest implements RestRequest {
 
     protected Client createClient() {
         Client client = Client.create();
-        client.setConnectTimeout(CONNECT_TIMEOUT);
-        client.setReadTimeout(READ_TIMEOUT);
+        client.setConnectTimeout(Config.getConnectTimeout());
+        client.setReadTimeout(Config.getReadTimeout());
         client.setChunkedEncodingSize(8*1024);
         userAgent.install(client);
         return client;
@@ -103,7 +93,7 @@ public class ExecutingRestRequest implements RestRequest {
 
     private Builder builder( String path ) {
         WebResource resource = client.resource( uri( pathOrAbsolute( path ) ) );
-        if (STREAM_ENABLED) return resource.accept(STREAMING_JSON_TYPE).header("X-Stream","true");
+        if (Config.streamingIsEnabled()) return resource.accept(STREAMING_JSON_TYPE).header("X-Stream","true");
         return resource.accept(APPLICATION_JSON_TYPE);
     }
 

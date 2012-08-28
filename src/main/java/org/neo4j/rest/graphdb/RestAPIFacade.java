@@ -19,10 +19,7 @@
  */
 package org.neo4j.rest.graphdb;
 
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.PropertyContainer;
-import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.*;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.rest.graphdb.batch.BatchCallback;
@@ -35,7 +32,9 @@ import org.neo4j.rest.graphdb.index.IndexInfo;
 import org.neo4j.rest.graphdb.index.RestIndex;
 import org.neo4j.rest.graphdb.index.RestIndexManager;
 import org.neo4j.rest.graphdb.services.RequestType;
+import org.neo4j.rest.graphdb.transaction.NullTransaction;
 import org.neo4j.rest.graphdb.traversal.RestTraverser;
+import org.neo4j.rest.graphdb.util.Config;
 import org.neo4j.rest.graphdb.util.QueryResult;
 import org.neo4j.rest.graphdb.util.ResultConverter;
 
@@ -47,6 +46,7 @@ import java.util.Set;
  * @since 03.05.12
  */
 public class RestAPIFacade implements RestAPI {
+
     @Override
     public RestIndexManager index() {
         return new RestIndexManager(this);
@@ -108,8 +108,10 @@ public class RestAPIFacade implements RestAPI {
     }
 
     @Override
-    public BatchTransaction beginTx() {
-        return BatchTransaction.begin(this);
+    public Transaction beginTx() {
+        if (Config.useBatchTransactions())
+            return BatchTransaction.begin(this);
+        return new NullTransaction();
     }
 
     @Override
