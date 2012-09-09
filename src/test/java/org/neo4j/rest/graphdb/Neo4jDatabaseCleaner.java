@@ -30,6 +30,7 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.rest.graphdb.index.RestAutoIndexer;
+import org.neo4j.tooling.GlobalGraphOperations;
 
 /**
  * @author mh
@@ -58,7 +59,7 @@ public class Neo4jDatabaseCleaner {
     private void removeNodes(Map<String, Object> result) {
         Node refNode = graph.getReferenceNode();
         int nodes = 0, relationships = 0;
-        for (Node node : graph.getAllNodes()) {
+        for (Node node : GlobalGraphOperations.at(graph).getAllNodes()) {
             for (Relationship rel : node.getRelationships(Direction.OUTGOING)) {
                 rel.delete();
                 relationships++;
