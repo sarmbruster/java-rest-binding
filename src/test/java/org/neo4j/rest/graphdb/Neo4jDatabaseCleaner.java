@@ -29,6 +29,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.IndexManager;
+import org.neo4j.rest.graphdb.index.RestAutoIndexer;
 
 /**
  * @author mh
@@ -77,10 +78,14 @@ public class Neo4jDatabaseCleaner {
         result.put("node-indexes", Arrays.asList(indexManager.nodeIndexNames()));
         result.put("relationship-indexes", Arrays.asList(indexManager.relationshipIndexNames()));
         for (String ix : indexManager.nodeIndexNames()) {
-            indexManager.forNodes(ix).delete();
+            if (!(RestAutoIndexer.NODE_AUTO_INDEX).equals(ix)) { // autoindex is not deletable
+                indexManager.forNodes(ix).delete();
+            }
         }
         for (String ix : indexManager.relationshipIndexNames()) {
-            indexManager.forRelationships(ix).delete();
+            if (!(RestAutoIndexer.RELATIONSHIP_AUTO_INDEX).equals(ix)) { // autoindex is not deletable
+                indexManager.forRelationships(ix).delete();
+            }
         }
     }
 }

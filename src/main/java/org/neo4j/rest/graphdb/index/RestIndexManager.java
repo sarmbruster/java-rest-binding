@@ -133,12 +133,12 @@ public class RestIndexManager implements IndexManager {
 
 	@Override
 	public AutoIndexer<Node> getNodeAutoIndexer() {
-		 return new RestAutoIndexer<Node>(restApi, Node.class);
+		 return new RestAutoIndexer<Node>(restApi, Node.class, this);
 	}
 
 	@Override
 	public RelationshipAutoIndexer getRelationshipAutoIndexer() {
-		 return new RestRelationshipAutoIndexer(restApi);
+		 return new RestRelationshipAutoIndexer(restApi, this);
 	}
 }
 

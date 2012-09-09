@@ -19,25 +19,28 @@
  */
 package org.neo4j.rest.graphdb.index;
 
+import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.index.AutoIndexer;
+import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.graphdb.index.ReadableIndex;
 import org.neo4j.rest.graphdb.RestAPI;
 
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 import java.util.Set;
-import java.lang.reflect.ParameterizedType;
 
 public class RestAutoIndexer<T extends PropertyContainer> implements AutoIndexer<T> {
 
+    public static final String NODE_AUTO_INDEX = "node_auto_index";
+    public static final String RELATIONSHIP_AUTO_INDEX = "relationship_auto_index";
     protected final RestAPI restApi;
     protected final Class forClass;
+    protected final IndexManager indexManager;
 
 
-    public RestAutoIndexer(RestAPI restApi, Class forClass) {
+    public RestAutoIndexer(RestAPI restApi, Class forClass, IndexManager indexManager) {
         this.restApi = restApi;
         this.forClass = forClass;
+        this.indexManager = indexManager;
     }
 
     @Override
@@ -52,7 +55,11 @@ public class RestAutoIndexer<T extends PropertyContainer> implements AutoIndexer
 
     @Override
     public ReadableIndex<T> getAutoIndex() {
-        throw new UnsupportedOperationException();
+        if (forClass.isAssignableFrom(Node.class)) {
+            return (ReadableIndex<T>) indexManager.forNodes(NODE_AUTO_INDEX);
+        } else {
+            return (ReadableIndex<T>) indexManager.forRelationships(RELATIONSHIP_AUTO_INDEX);
+        }
     }
 
     @Override
