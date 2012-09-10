@@ -21,14 +21,15 @@ package org.neo4j.rest.graphdb.index;
 
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.index.IndexManager;
+import org.neo4j.graphdb.index.ReadableIndex;
 import org.neo4j.graphdb.index.ReadableRelationshipIndex;
 import org.neo4j.graphdb.index.RelationshipAutoIndexer;
 import org.neo4j.rest.graphdb.RestAPI;
 
 public class RestRelationshipAutoIndexer extends RestAutoIndexer<Relationship> implements RelationshipAutoIndexer {
 
-    public RestRelationshipAutoIndexer(RestAPI restApi, IndexManager indexManager) {
-        super(restApi, Relationship.class, indexManager);
+    public RestRelationshipAutoIndexer(RestAPI restApi, ReadableRelationshipIndex autoIndex) {
+        super(restApi, Relationship.class, autoIndex);
     }
 
     public ReadableRelationshipIndex getAutoIndex() {

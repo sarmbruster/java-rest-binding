@@ -82,16 +82,18 @@ public class Neo4jDatabaseCleaner {
         result.put("node-indexes", Arrays.asList(indexManager.nodeIndexNames()));
         result.put("relationship-indexes", Arrays.asList(indexManager.relationshipIndexNames()));
         for (String ix : indexManager.nodeIndexNames()) {
-            Index<Node> nodeIndex = indexManager.forNodes(ix);
-            if (!(nodeIndex instanceof ReadableIndex)) {
-                nodeIndex.delete();
-            }
+            deleteIndex(indexManager.forNodes(ix));
         }
         for (String ix : indexManager.relationshipIndexNames()) {
-            RelationshipIndex relationshipIndex = indexManager.forRelationships(ix);
-            if (!(relationshipIndex instanceof ReadableIndex)) {
-                relationshipIndex.delete();
-            }
+            deleteIndex(indexManager.forRelationships(ix));
+        }
+    }
+
+    private void deleteIndex(Index index) {
+        try {
+            index.delete();
+        } catch (UnsupportedOperationException e) {
+            // pass
         }
     }
 }

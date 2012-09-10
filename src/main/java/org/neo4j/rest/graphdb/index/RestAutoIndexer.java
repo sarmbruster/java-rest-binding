@@ -30,17 +30,15 @@ import java.util.Set;
 
 public class RestAutoIndexer<T extends PropertyContainer> implements AutoIndexer<T> {
 
-    public static final String NODE_AUTO_INDEX = "node_auto_index";
-    public static final String RELATIONSHIP_AUTO_INDEX = "relationship_auto_index";
     protected final RestAPI restApi;
     protected final Class forClass;
-    protected final IndexManager indexManager;
+    protected final ReadableIndex<T> autoIndex;
 
 
-    public RestAutoIndexer(RestAPI restApi, Class forClass, IndexManager indexManager) {
+    public RestAutoIndexer(RestAPI restApi, Class forClass, ReadableIndex<T> autoIndex) {
         this.restApi = restApi;
         this.forClass = forClass;
-        this.indexManager = indexManager;
+        this.autoIndex = autoIndex;
     }
 
     @Override
@@ -55,11 +53,7 @@ public class RestAutoIndexer<T extends PropertyContainer> implements AutoIndexer
 
     @Override
     public ReadableIndex<T> getAutoIndex() {
-        if (forClass.isAssignableFrom(Node.class)) {
-            return (ReadableIndex<T>) indexManager.forNodes(NODE_AUTO_INDEX);
-        } else {
-            return (ReadableIndex<T>) indexManager.forRelationships(RELATIONSHIP_AUTO_INDEX);
-        }
+        return autoIndex;
     }
 
     @Override
