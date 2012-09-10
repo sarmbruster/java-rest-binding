@@ -28,7 +28,10 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexManager;
+import org.neo4j.graphdb.index.ReadableIndex;
+import org.neo4j.graphdb.index.RelationshipIndex;
 import org.neo4j.rest.graphdb.index.RestAutoIndexer;
 import org.neo4j.tooling.GlobalGraphOperations;
 
@@ -79,13 +82,15 @@ public class Neo4jDatabaseCleaner {
         result.put("node-indexes", Arrays.asList(indexManager.nodeIndexNames()));
         result.put("relationship-indexes", Arrays.asList(indexManager.relationshipIndexNames()));
         for (String ix : indexManager.nodeIndexNames()) {
-            if (!(RestAutoIndexer.NODE_AUTO_INDEX).equals(ix)) { // autoindex is not deletable
-                indexManager.forNodes(ix).delete();
+            Index<Node> nodeIndex = indexManager.forNodes(ix);
+            if (!(nodeIndex instanceof ReadableIndex)) {
+                nodeIndex.delete();
             }
         }
         for (String ix : indexManager.relationshipIndexNames()) {
-            if (!(RestAutoIndexer.RELATIONSHIP_AUTO_INDEX).equals(ix)) { // autoindex is not deletable
-                indexManager.forRelationships(ix).delete();
+            RelationshipIndex relationshipIndex = indexManager.forRelationships(ix);
+            if (!(relationshipIndex instanceof ReadableIndex)) {
+                relationshipIndex.delete();
             }
         }
     }
