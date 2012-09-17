@@ -40,7 +40,7 @@ public class Config {
     }
 
     public static boolean useBatchTransactions() {
-        return System.getProperty(CONFIG_BATCH_TRANSACTION,"true").equalsIgnoreCase("true");
+        return System.getProperty(CONFIG_BATCH_TRANSACTION,"false").equalsIgnoreCase("true");
     }
 
     public static boolean useLoggingFilter() {
