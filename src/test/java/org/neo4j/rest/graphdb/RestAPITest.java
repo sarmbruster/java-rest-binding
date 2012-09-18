@@ -20,6 +20,7 @@
 package org.neo4j.rest.graphdb;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
@@ -29,9 +30,7 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.*;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.index.impl.lucene.LuceneIndexImplementation;
@@ -71,7 +70,24 @@ public class RestAPITest extends RestTestBase {
         Assert.assertEquals( node, getRestGraphDb().getNodeById( node.getId() ));
         Assert.assertEquals( "test", getRestGraphDb().getNodeById( node.getId()).getProperty("name") );
     }
-	
+
+    @Test
+    public void testGetSingleRelationshipShouldReturnNullIfThereIsNone() throws Exception {
+        assertNull(getRestGraphDb().getReferenceNode().getSingleRelationship(DynamicRelationshipType.withName("foo"),Direction.OUTGOING));
+    }
+    @Test
+    public void testHasSingleRelationshipShouldReturnFalseIfThereIsNone() throws Exception {
+        assertEquals(false,getRestGraphDb().getReferenceNode().hasRelationship(DynamicRelationshipType.withName("foo"),Direction.OUTGOING));
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void testGetReferenceNodeOnEmptyDbFails() {
+        Transaction tx = getGraphDatabase().beginTx();
+        getGraphDatabase().getReferenceNode().delete();
+        tx.success();tx.finish();
+        getRestGraphDb().getReferenceNode();
+    }
+
 	@Test
     public void testCreateRelationshipWithParams() {
         Node refNode = getRestGraphDb().getReferenceNode();

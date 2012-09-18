@@ -261,7 +261,14 @@ public class ExecutingRestAPI implements RestAPI {
     @Override
     public Node getReferenceNode() {
         Map<?, ?> map = restRequest.get("").toMap();
-        return new RestNode((String) map.get("reference_node"), facade);
+        String referenceNodeUri = (String) map.get("reference_node");
+        if (referenceNodeUri==null) throw new NotFoundException("Reference node not available");
+
+        RequestResult response = restRequest.get(referenceNodeUri);
+        if (response.statusIs(Status.NOT_FOUND)) {
+            throw new NotFoundException("Reference node not available");
+        }
+        return new RestNode(response.toMap(), facade);
     }
 
     public long getPropertyRefetchTimeInMillis() {
