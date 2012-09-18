@@ -80,14 +80,6 @@ public class RestAPITest extends RestTestBase {
         assertEquals(false,getRestGraphDb().getReferenceNode().hasRelationship(DynamicRelationshipType.withName("foo"),Direction.OUTGOING));
     }
 
-    @Test(expected = NotFoundException.class)
-    public void testGetReferenceNodeOnEmptyDbFails() {
-        Transaction tx = getGraphDatabase().beginTx();
-        getGraphDatabase().getReferenceNode().delete();
-        tx.success();tx.finish();
-        getRestGraphDb().getReferenceNode();
-    }
-
 	@Test
     public void testCreateRelationshipWithParams() {
         Node refNode = getRestGraphDb().getReferenceNode();

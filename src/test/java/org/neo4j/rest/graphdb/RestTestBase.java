@@ -41,11 +41,22 @@ public class RestTestBase {
     private GraphDatabaseService restGraphDb;
     private static final String HOSTNAME = "localhost";
     private static final int PORT = 7473;
-    private static LocalTestServer neoServer = new LocalTestServer(HOSTNAME,PORT).withPropertiesFile("neo4j-server.properties");
+    private static LocalTestServer neoServer;
     public static final String SERVER_ROOT = "http://" + HOSTNAME + ":" + PORT;
     protected static final String SERVER_ROOT_URI = SERVER_ROOT + "/db/data/";
     private static final String SERVER_CLEANDB_URI = SERVER_ROOT + "/cleandb/secret-key";
     private static final String CONFIG = RestTestBase.class.getResource("/neo4j-server.properties").getFile();
+
+    static {
+        initServer();
+    }
+
+    protected static void initServer() {
+        if (neoServer!=null) {
+            neoServer.stop();
+        }
+        neoServer = new LocalTestServer(HOSTNAME,PORT).withPropertiesFile("neo4j-server.properties");
+    }
 
     @BeforeClass
     public static void startDb() throws Exception {
