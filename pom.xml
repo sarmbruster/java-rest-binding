@@ -16,7 +16,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <slf4j.version>1.6.1</slf4j.version>
-        <neo4j.version>1.8.RC1</neo4j.version>
+        <neo4j.version>1.8</neo4j.version>
         <jersey.version>1.4</jersey.version>
         <blueprints.version>1.2</blueprints.version>
         <gremlin.version>1.5</gremlin.version>
@@ -86,7 +86,7 @@ the relevant Commercial Agreement.
         <dependency>
           <groupId>org.codehaus.jackson</groupId>
           <artifactId>jackson-jaxrs</artifactId>
-          <version>1.8.5</version>
+          <version>1.9.7</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -152,10 +152,10 @@ the relevant Commercial Agreement.
                   <groupId>com.sun.jersey</groupId>
                   <artifactId>jersey-server</artifactId>
               </exclusion>
-              <exclusion>
+              <!--exclusion>
                 <artifactId>jackson-jaxrs</artifactId>
                 <groupId>org.codehaus.jackson</groupId>
-              </exclusion>
+              </exclusion-->
               <exclusion>
                   <groupId>de.huxhorn.lilith</groupId>
                   <artifactId>de.huxhorn.lilith.3rdparty.rrd4j</artifactId>
