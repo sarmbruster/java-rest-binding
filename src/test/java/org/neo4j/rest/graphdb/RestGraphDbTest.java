@@ -34,7 +34,7 @@ import org.neo4j.rest.graphdb.util.TestHelper;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.junit.internal.matchers.IsCollectionContaining.hasItems;
+import static org.junit.matchers.JUnitMatchers.hasItems;
 
 public class RestGraphDbTest extends RestTestBase {
 

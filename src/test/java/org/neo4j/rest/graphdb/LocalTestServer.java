@@ -29,7 +29,7 @@ import org.neo4j.server.database.WrappingDatabase;
 import org.neo4j.server.modules.RESTApiModule;
 import org.neo4j.server.modules.ServerModule;
 import org.neo4j.server.modules.ThirdPartyJAXRSModule;
-import org.neo4j.server.startup.healthcheck.StartupHealthCheck;
+import org.neo4j.server.preflight.PreFlightTasks;
 import org.neo4j.server.web.Jetty6WebServer;
 import org.neo4j.server.web.WebServer;
 import org.neo4j.test.ImpermanentGraphDatabase;
@@ -120,8 +120,8 @@ public class LocalTestServer {
             }
 
             @Override
-            protected StartupHealthCheck createHealthCheck() {
-                return new StartupHealthCheck();
+            protected PreFlightTasks createPreflightTasks() {
+                return new PreFlightTasks();
             }
 
             @Override
@@ -131,7 +131,7 @@ public class LocalTestServer {
 
             @Override
             protected Iterable<ServerModule> createServerModules() {
-                return asList(new RESTApiModule(webServer,database,configurator.configuration()),new ThirdPartyJAXRSModule(webServer,configurator));
+                return asList(new RESTApiModule(webServer,database,configurator.configuration()),new ThirdPartyJAXRSModule(webServer,configurator,this));
             }
         };
         neoServer.start();

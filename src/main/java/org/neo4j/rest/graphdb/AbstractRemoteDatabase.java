@@ -28,7 +28,6 @@ import org.neo4j.kernel.KernelData;
 import org.neo4j.kernel.TransactionBuilder;
 import org.neo4j.kernel.guard.Guard;
 import org.neo4j.kernel.impl.core.KernelPanicEventGenerator;
-import org.neo4j.kernel.impl.core.LockReleaser;
 import org.neo4j.kernel.impl.core.NodeManager;
 import org.neo4j.kernel.impl.core.RelationshipTypeHolder;
 import org.neo4j.kernel.impl.nioneo.store.StoreId;
@@ -74,7 +73,6 @@ abstract class AbstractRemoteDatabase implements GraphDatabaseAPI {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     public <T> Collection<T> getManagementBeans(Class<T> type) {
         throw new UnsupportedOperationException();
     }
@@ -89,7 +87,6 @@ abstract class AbstractRemoteDatabase implements GraphDatabaseAPI {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     public <T> T getSingleManagementBean(Class<T> type) {
         throw new UnsupportedOperationException();
     }
@@ -135,11 +132,6 @@ abstract class AbstractRemoteDatabase implements GraphDatabaseAPI {
     }
 
     @Override
-    public LockReleaser getLockReleaser() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public NodeManager getNodeManager() {
         throw new UnsupportedOperationException();
     }
@@ -154,6 +146,11 @@ abstract class AbstractRemoteDatabase implements GraphDatabaseAPI {
 
     @Override
     public TxIdGenerator getTxIdGenerator() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public DependencyResolver getDependencyResolver() {
         throw new UnsupportedOperationException();
     }
 }
