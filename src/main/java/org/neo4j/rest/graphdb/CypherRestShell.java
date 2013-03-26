@@ -19,27 +19,31 @@
  */
 package org.neo4j.rest.graphdb;
 
-import org.junit.Ignore;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.List;
 import java.util.Map;
 
-@Ignore
-public class CypherTestRunner {
+public class CypherRestShell {
     public static void main(String[] args) throws IOException {
         String uri = (args.length>0) ? args[0] : "http://localhost:7474/db/data";
-        RestAPIFacade restAPIFacade = new RestAPIFacade(uri);
+        RestAPIFacade restAPIFacade = args.length>1 ? new RestAPIFacade(uri,args[1],args[2]) : new RestAPIFacade(uri);
+        System.out.println("Connected to "+uri);
         try {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        String query=null;
+        String query;
         System.out.print("Query: ");
-        while ((query=reader.readLine())!=null) {
+        while ((query=reader.readLine())!=null && !query.isEmpty()) {
+            long time=System.currentTimeMillis();
             Map<?,?> result = restAPIFacade.query(query, null);
-            for (Map.Entry<?, ?> row : result.entrySet()) {
+            time=System.currentTimeMillis()-time;
+            System.out.println(result.get("columns"));
+            List<List<Object>> rows = (List<List<Object>>) result.get("data");
+            for (List<Object> row : rows) {
                 System.out.println(row);
             }
+            System.out.println(rows.size()+" row(s), roundtrip time "+time+" ms.");
             System.out.print("Query: ");
         }
         } finally {

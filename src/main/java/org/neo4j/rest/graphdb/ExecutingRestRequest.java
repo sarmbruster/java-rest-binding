@@ -26,6 +26,7 @@ import java.net.URLEncoder;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import javax.ws.rs.core.MediaType;
 
@@ -45,7 +46,14 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 
 public class ExecutingRestRequest implements RestRequest {
 
-    final static ExecutorService pool= Executors.newFixedThreadPool(Config.getWriterThreads());
+    final static ExecutorService pool= Executors.newFixedThreadPool(Config.getWriterThreads(), new ThreadFactory() {
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread thread = new Thread(r);
+            thread.setDaemon(true);
+            return thread;
+        }
+    });
 
     public static final MediaType STREAMING_JSON_TYPE = new MediaType(APPLICATION_JSON_TYPE.getType(),APPLICATION_JSON_TYPE.getSubtype(), MapUtil.stringMap("stream","true"));
     private final String baseUri;
