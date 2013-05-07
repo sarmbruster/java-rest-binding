@@ -301,10 +301,17 @@ the relevant Commercial Agreement.
     </build>
 
   <distributionManagement>
-    <site>
-      <id>neo4j-site</id>
-      <url>scpexe://static.neo4j.org/var/www/components.neo4j.org/${project.artifactId}/${project.version}</url>
-    </site>
+    <repository>
+      <id>releases@repo.neo4j.org</id>
+      <name>releases@repo.neo4j.org</name>
+      <uniqueVersion>false</uniqueVersion>
+      <url>http://m2.neo4j.org/content/repositories/releases</url>
+    </repository>
+    <snapshotRepository>
+      <id>snapshots@repo.neo4j.org</id>
+      <name>snapshots@repo.neo4j.org</name>
+      <uniqueVersion>false</uniqueVersion>
+      <url>http://m2.neo4j.org/content/repositories/snapshots</url>
+    </snapshotRepository>
   </distributionManagement>
-
 </project>
