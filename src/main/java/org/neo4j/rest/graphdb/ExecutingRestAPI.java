@@ -179,7 +179,7 @@ public class ExecutingRestAPI implements RestAPI {
 
     @Override
     public void close() {
-        ExecutingRestRequest.shutdown();
+        if (restRequest!=null) restRequest.close();
     }
 
     @Override

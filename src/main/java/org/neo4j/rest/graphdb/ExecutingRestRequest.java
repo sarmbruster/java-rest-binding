@@ -46,15 +46,6 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 
 public class ExecutingRestRequest implements RestRequest {
 
-    final static ExecutorService pool= Executors.newFixedThreadPool(Config.getWriterThreads(), new ThreadFactory() {
-        @Override
-        public Thread newThread(Runnable r) {
-            Thread thread = new Thread(r);
-            thread.setDaemon(true);
-            return thread;
-        }
-    });
-
     public static final MediaType STREAMING_JSON_TYPE = new MediaType(APPLICATION_JSON_TYPE.getType(),APPLICATION_JSON_TYPE.getSubtype(), MapUtil.stringMap("stream","true"));
     private final String baseUri;
     private final UserAgent userAgent = new UserAgent();
@@ -151,34 +142,6 @@ public class ExecutingRestRequest implements RestRequest {
         return RequestResult.extractFrom(builder.post(ClientResponse.class));
     }
 
-    private InputStream toInputStream(final Object data) {
-        try {
-            if (data instanceof InputStream) return (InputStream) data;
-            final PipedInputStream inputStream = new PipedInputStream(8 * 1024);
-            final PipedOutputStream outputStream = new PipedOutputStream(inputStream);
-            pool.submit(new Runnable() {
-                public void run() {                     
-                    StreamJsonHelper.writeJsonTo(data, outputStream);
-                    try {
-                        outputStream.close();
-                    } catch (IOException e) {
-                        System.err.println("Error closing output stream for sent data "+e.getMessage());
-                        // ignore
-                    }
-                    try {
-                        inputStream.close();
-                    } catch (IOException e) {
-                        System.err.println("Error closing input stream for sent data "+e.getMessage());
-                        // ignore
-                    }
-                }
-            });
-            return inputStream;
-        } catch (IOException e) {
-            throw new RuntimeException("Error writing "+data+" to stream",e);
-        }
-    }
-
     @Override
     public RequestResult put( String path, Object data ) {
         Builder builder = builder( path );
@@ -212,7 +175,7 @@ public class ExecutingRestRequest implements RestRequest {
 	   return requestResult.toMap();
 	}
 
-    public static void shutdown() {
-        pool.shutdown();
+    public void close() {
+        client.destroy();
     }
 }

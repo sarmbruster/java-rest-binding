@@ -105,8 +105,7 @@ public class RecordingRestRequest implements RestRequest {
     }       
 
     private String uriWithoutSlash( String uri ) {
-        String uriString = uri;
-        return uriString.endsWith( "/" ) ?  uriString.substring( 0, uriString.length() - 1 )  : uri;
+        return uri.endsWith("/") ?  uri.substring(0, uri.length() - 1)  : uri;
     }
 
     public static String encode( Object value ) {
@@ -124,6 +123,10 @@ public class RecordingRestRequest implements RestRequest {
 
     public void stop() {
         this.stop = true;
+    }
+
+    @Override
+    public void close() {
     }
 
     public String getBaseUri() {

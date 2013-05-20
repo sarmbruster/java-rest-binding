@@ -39,4 +39,5 @@ public interface RestRequest {
     
     Map<?, ?> toMap( RequestResult requestResult);
 
+    void close();
 }
